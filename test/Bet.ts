@@ -76,14 +76,14 @@ describe("Bet", () => {
             expect(actual).to.equal(amount);
         });
 
-        it("Shouldn't be allowed betting multiple times", async () => {
+        it("Should not allow betting multiple times", async () => {
             const amount2 = 2000;
             await bet.connect(otherAccount).bet(optionIndex, { value: amount });
 
             await expect(bet.connect(otherAccount).bet(optionIndex, { value: amount2 })).to.be.revertedWith('You already bet');
         });
 
-        it("Shouldn't be allowed betting on different options", async () => {
+        it("Should not allow betting on different options", async () => {
             const optionIndex2 = 1;
             await bet.connect(otherAccount).bet(optionIndex, { value: amount });
 
