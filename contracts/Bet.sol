@@ -4,8 +4,14 @@ import "hardhat/console.sol";
 
 contract Bet {
     string public name;
+    string[] public options;
 
-    constructor (string memory _name) {
+    constructor (string memory _name, string[] memory _options) {
         name = _name;
+        options = _options;
+    }
+
+    function getOptions() public view returns (string[] memory) {
+        return options;
     }
 }
