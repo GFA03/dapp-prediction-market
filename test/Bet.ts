@@ -360,5 +360,16 @@ describe("Bet", () => {
       await bet.connect(owner).setWinner(OPTION_INDEX);
       await expect(bet.connect(owner).setWinner(OPTION_INDEX)).to.be.revertedWith("Betting must be closed to set a winner");
     });
+
+    it("Should return money to the winning bettors", async () => {
+      await placeBet(user1);
+      await placeBet(user2, 1, AMOUNT * 2);
+      await placeBet(otherAccount);
+      await bet.connect(owner).close();
+      await expect(bet.connect(owner).setWinner(OPTION_INDEX)).to.changeEtherBalances(
+        [user1, otherAccount, bet],
+        [BigInt(AMOUNT * 2), BigInt(AMOUNT * 2), BigInt(-AMOUNT * 4)]
+      );
+    });
   });
 });
