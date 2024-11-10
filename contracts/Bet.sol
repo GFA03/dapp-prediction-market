@@ -21,7 +21,6 @@ contract Bet is Ownable {
     // mapping from adress to option index and amount
     mapping(address => BetRecord) public bets;
     address[] public bettors;
-    mapping(address => bool) public refunded; // Track refunded bettors
 
     event BetEvent(
         address indexed bettor,
@@ -42,16 +41,19 @@ contract Bet is Ownable {
         options = _options;
     }
 
-    function getOptions() public view returns (string[] memory) {
-        return options;
-    }
-
-    function bet(uint _option) public payable {
+    modifier canPlaceBet(uint _option) {
         require(status == Status.Open, "Betting is closed");
         require(_option < options.length, "Invalid option");
         require(msg.value > 0, "Invalid amount");
         require(bets[msg.sender].amount == 0, "You already bet");
+        _;
+    }
 
+    function getOptions() public view returns (string[] memory) {
+        return options;
+    }
+
+    function bet(uint _option) public payable canPlaceBet(_option) {
         bets[msg.sender] = BetRecord(_option, msg.value);
         bettors.push(msg.sender);
 
@@ -59,9 +61,12 @@ contract Bet is Ownable {
     }
 
     function distributeRewards(uint _winningOption) public onlyOwner {
-        require(status == Status.Closed, "Betting must be closed to set a winner");
+        require(
+            status == Status.Closed,
+            "Betting must be closed to set a winner"
+        );
         require(_winningOption < options.length, "Invalid option");
-        
+
         uint totalWinningAmount = 0;
 
         // Calculate total bet amount for the winning option
@@ -71,10 +76,13 @@ contract Bet is Ownable {
             }
         }
 
+        require(totalWinningAmount > 0, "No winning bets");
+
         // Distribute rewards to winners
         for (uint i = 0; i < bettors.length; i++) {
             if (bets[bettors[i]].option == _winningOption) {
-                uint payout = (bets[bettors[i]].amount * address(this).balance) / totalWinningAmount;
+                uint payout = (bets[bettors[i]].amount *
+                    address(this).balance) / totalWinningAmount;
                 payable(bettors[i]).transfer(payout);
             }
         }
@@ -91,6 +99,15 @@ contract Bet is Ownable {
         emit CloseEvent();
     }
 
+    function cancel() public onlyOwner {
+        require(status == Status.Open, "Betting is closed");
+
+        status = Status.Canceled;
+        restoreFunds();
+
+        emit CancelEvent();
+    }
+
     // function to return the bet amount to the bettor if the bet was canceled
     function restoreFunds() private onlyOwner {
         require(status == Status.Canceled, "Betting is not canceled");
@@ -104,14 +121,15 @@ contract Bet is Ownable {
         }
     }
 
-    function cancel() public onlyOwner {
+    function withdrawBet() public {
         require(status == Status.Open, "Betting is closed");
+        require(bets[msg.sender].amount > 0, "You didn't bet");
 
-        status = Status.Canceled;
+        uint amount = bets[msg.sender].amount;
+        console.log("amount: %d", amount);
+        delete bets[msg.sender];
 
-        restoreFunds();
-
-        emit CancelEvent();
+        payable(msg.sender).transfer(amount);
     }
 
     function getBalance() public view returns (uint) {

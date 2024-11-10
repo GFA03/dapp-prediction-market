@@ -81,5 +81,22 @@ describe("Bet", () => {
             await bet.connect(owner).cancel();
             await expect(placeBet(otherAccount)).to.be.revertedWith(REVERT_BET_CLOSED);
         });
+
+        it("Should allow a bettor to withdraw their bet", async () => {
+            const provider = hre.ethers.provider;
+            await placeBet(otherAccount);
+            const postBetBalance = await provider.getBalance(otherAccount.address);
+            
+            const tx = await bet.connect(otherAccount).withdrawBet();
+            const receipt = await tx.wait();
+            const postWithdrawBalance = await provider.getBalance(otherAccount.address);
+            if (receipt !== null) {
+                const gasUsed = receipt.gasUsed;
+                const gasPrice = receipt.gasPrice;
+                
+                const expectedBalanceAfterWithdraw = postBetBalance + BigInt(AMOUNT) - gasUsed * gasPrice;
+                expect(postWithdrawBalance).to.equal(expectedBalanceAfterWithdraw);
+            }
+        });
     });
 });
