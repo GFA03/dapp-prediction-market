@@ -14,9 +14,9 @@ describe("Bet", () => {
   async function deployBet() {
     const name = "Test Bet";
     const options = ["Option 1", "Option 2"];
-    const [owner, otherAccount] = await hre.ethers.getSigners();
+    const [owner, otherAccount, user1, user2] = await hre.ethers.getSigners();
     const bet = await hre.ethers.deployContract("Bet", [name, options]);
-    return { bet, name, options, owner, otherAccount };
+    return { bet, name, options, owner, otherAccount, user1, user2 };
   }
 
   describe("Deployment", () => {
@@ -112,24 +112,33 @@ describe("Bet", () => {
       return bet.connect(account).bet(option, { value: amount });
     }
 
+    // it("Should allow a bettor to withdraw their bet", async () => {
+    //   const provider = hre.ethers.provider;
+    //   await placeBet(otherAccount);
+    //   const postBetBalance = await provider.getBalance(otherAccount.address);
+
+    //   const tx = await bet.connect(otherAccount).withdrawBet();
+    //   const receipt = await tx.wait();
+    //   const postWithdrawBalance = await provider.getBalance(
+    //     otherAccount.address
+    //   );
+    //   if (receipt !== null) {
+    //     const gasUsed = receipt.gasUsed;
+    //     const gasPrice = receipt.gasPrice;
+
+    //     const expectedBalanceAfterWithdraw =
+    //       postBetBalance + BigInt(AMOUNT) - gasUsed * gasPrice;
+    //     expect(postWithdrawBalance).to.equal(expectedBalanceAfterWithdraw);
+    //   }
+    // });
+
     it("Should allow a bettor to withdraw their bet", async () => {
-      const provider = hre.ethers.provider;
       await placeBet(otherAccount);
-      const postBetBalance = await provider.getBalance(otherAccount.address);
-
-      const tx = await bet.connect(otherAccount).withdrawBet();
-      const receipt = await tx.wait();
-      const postWithdrawBalance = await provider.getBalance(
-        otherAccount.address
+      
+      await expect(bet.connect(otherAccount).withdrawBet()).to.changeEtherBalances(
+        [otherAccount, bet],
+        [BigInt(AMOUNT), BigInt(-AMOUNT)]
       );
-      if (receipt !== null) {
-        const gasUsed = receipt.gasUsed;
-        const gasPrice = receipt.gasPrice;
-
-        const expectedBalanceAfterWithdraw =
-          postBetBalance + BigInt(AMOUNT) - gasUsed * gasPrice;
-        expect(postWithdrawBalance).to.equal(expectedBalanceAfterWithdraw);
-      }
     });
 
     it("Should not allow a bettor to withdraw if he has not bet", async () => {
@@ -277,8 +286,52 @@ describe("Bet", () => {
     });
 
     it("Should emit Canceling Event", async () => {
-        await expect(bet.connect(owner).cancel()).to.emit(bet, "CancelEvent");
-      });
+      await expect(bet.connect(owner).cancel()).to.emit(bet, "CancelEvent");
+    });
+  });
+
+  describe("Winning", () => {
+    let bet: Bet, owner: HardhatEthersSigner, otherAccount: HardhatEthersSigner, user1: HardhatEthersSigner, user2: HardhatEthersSigner;
+
+    beforeEach(async () => {
+      ({ bet, owner, otherAccount, user1, user2 } = await loadFixture(deployBet));
+    });
+
+    async function placeBet(
+      account: HardhatEthersSigner,
+      option = OPTION_INDEX,
+      amount = AMOUNT
+    ) {
+      return bet.connect(account).bet(option, { value: amount });
+    }
+
+    it("Should allow the owner to declare a winner", async () => { 
+      await placeBet(owner);
+      await bet.connect(owner).close();
+      await bet.connect(owner).setWinner(OPTION_INDEX);
+      expect(await bet.status()).to.equal(3); // Status.WinnerDeclared is 3
+    });
+
+    it("Should not allow the owner to declare a winner if there are no winning bets", async () => {
+      await bet.connect(owner).close();
+      await expect(bet.connect(owner).setWinner(OPTION_INDEX)).to.be.revertedWith("No winning bets");
+    });
+
+    it("Should not allow the owner to declare a winner if the event is not closed", async () => {
+      await expect(bet.connect(owner).setWinner(OPTION_INDEX)).to.be.revertedWith("Betting must be closed to set a winner");
+    });
+
+    it("Should not allow the owner to declare a winner if the winner is invalid", async () => {
+      await placeBet(owner);
+      await bet.connect(owner).close();
+      await expect(bet.connect(owner).setWinner(INVALID_OPTION_INDEX)).to.be.revertedWith("Invalid option");
+    });
+
+    it("Should not allow a non-owner to declare a winner", async () => {
+      await placeBet(owner);
+      await bet.connect(owner).close();
+      await expect(bet.connect(otherAccount).setWinner(OPTION_INDEX)).to.be.revertedWithCustomError(bet, "OwnableUnauthorizedAccount").withArgs(otherAccount.address);
+    });
   });
 });
 //todo: add tests for canceling the event (inclusive of account getting their funds back)

@@ -7,7 +7,8 @@ contract Bet is Ownable {
     enum Status {
         Open,
         Closed,
-        Canceled
+        Canceled,
+        Finished
     }
 
     struct BetRecord {
@@ -60,10 +61,18 @@ contract Bet is Ownable {
         emit BetEvent(msg.sender, _option, msg.value);
     }
 
-    function distributeRewards(uint _winningOption) public onlyOwner {
+    function setWinner(uint _winningOption) public onlyOwner {
+        require(status == Status.Closed, "Betting must be closed to set a winner");
+        require(_winningOption < options.length, "Invalid option");
+
+        status = Status.Finished;
+        distributeRewards(_winningOption);
+    }
+
+    function distributeRewards(uint _winningOption) private onlyOwner {
         require(
-            status == Status.Closed,
-            "Betting must be closed to set a winner"
+            status == Status.Finished,
+            "Betting must be finished to set a winner"
         );
         require(_winningOption < options.length, "Invalid option");
 
