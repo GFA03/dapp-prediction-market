@@ -54,7 +54,7 @@ contract Bet is Ownable {
         return options;
     }
 
-    function bet(uint _option) public payable canPlaceBet(_option) {
+    function bet(uint _option) external payable canPlaceBet(_option) {
         bets[msg.sender] = BetRecord(_option, msg.value);
         bettors.push(msg.sender);
 
@@ -87,14 +87,23 @@ contract Bet is Ownable {
 
         require(totalWinningAmount > 0, "No winning bets");
 
+        uint totalAmount = address(this).balance;
+
         // Distribute rewards to winners
         for (uint i = 0; i < bettors.length; i++) {
             if (bets[bettors[i]].option == _winningOption) {
-                uint payout = (bets[bettors[i]].amount *
-                    address(this).balance) / totalWinningAmount;
+                uint payout = calculatePayout(
+                    bets[bettors[i]].amount,
+                    totalAmount,
+                    totalWinningAmount
+                );
                 payable(bettors[i]).transfer(payout);
             }
         }
+    }
+
+    function calculatePayout(uint betAmount, uint totalAmount, uint totalWinningAmount) public pure returns (uint) {
+        return (betAmount * totalAmount) / totalWinningAmount;
     }
 
     function getBet() public view returns (uint, uint) {
@@ -130,7 +139,7 @@ contract Bet is Ownable {
         }
     }
 
-    function withdrawBet() public {
+    function withdrawBet() external {
         require(status == Status.Open, "Betting is closed");
         require(bets[msg.sender].amount > 0, "You didn't bet");
 

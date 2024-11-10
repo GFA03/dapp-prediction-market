@@ -332,6 +332,33 @@ describe("Bet", () => {
       await bet.connect(owner).close();
       await expect(bet.connect(otherAccount).setWinner(OPTION_INDEX)).to.be.revertedWithCustomError(bet, "OwnableUnauthorizedAccount").withArgs(otherAccount.address);
     });
+
+    it("Should not allow betting after the winner is declared", async () => {
+      await placeBet(owner);
+      await bet.connect(owner).close();
+      await bet.connect(owner).setWinner(OPTION_INDEX);
+      await expect(bet.connect(otherAccount).bet(OPTION_INDEX, { value: AMOUNT })).to.be.revertedWith(REVERT_BET_CLOSED);
+    });
+
+    it("Should not allow withdrawing after the winner is declared", async () => {
+      await placeBet(owner);
+      await bet.connect(owner).close();
+      await bet.connect(owner).setWinner(OPTION_INDEX);
+      await expect(bet.connect(owner).withdrawBet()).to.be.revertedWith(REVERT_BET_CLOSED);
+    });
+
+    it("Should not allow canceling after the winner is declared", async () => {
+      await placeBet(owner);
+      await bet.connect(owner).close();
+      await bet.connect(owner).setWinner(OPTION_INDEX);
+      await expect(bet.connect(owner).cancel()).to.be.revertedWith(REVERT_BET_CLOSED);
+    });
+
+    it("Should not allow the owner to declare a winner twice", async () => {
+      await placeBet(owner);
+      await bet.connect(owner).close();
+      await bet.connect(owner).setWinner(OPTION_INDEX);
+      await expect(bet.connect(owner).setWinner(OPTION_INDEX)).to.be.revertedWith("Betting must be closed to set a winner");
+    });
   });
 });
-//todo: add tests for canceling the event (inclusive of account getting their funds back)
