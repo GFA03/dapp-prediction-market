@@ -129,6 +129,8 @@ contract Bet is Ownable {
         delete bets[msg.sender];
 
         payable(msg.sender).transfer(amount);
+
+        emit CashbackEvent(msg.sender, amount);
     }
 
     function getBalance() public view returns (uint) {

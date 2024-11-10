@@ -161,6 +161,13 @@ describe("Bet", () => {
         "Betting is closed"
       );
     });
+
+    it("Should emit a Cashback event", async () => {
+      await placeBet(otherAccount);
+      await expect(bet.connect(otherAccount).withdrawBet())
+        .to.emit(bet, "CashbackEvent")
+        .withArgs(otherAccount.address, AMOUNT);
+    });
   });
 
   describe("Closing Betting", () => {
