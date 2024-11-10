@@ -372,4 +372,17 @@ describe("Bet", () => {
       );
     });
   });
+
+  describe("Get bet", () => {
+    it("Should return the bet of the user", async () => {
+      const { bet, otherAccount } = await loadFixture(deployBet);
+      await bet.connect(otherAccount).bet(OPTION_INDEX, { value: AMOUNT });
+      expect(await bet.connect(otherAccount).getBet()).to.deep.equal([OPTION_INDEX, AMOUNT]);
+    });
+
+    it("Should return an empty array if the user has not bet", async () => {
+      const { bet, otherAccount } = await loadFixture(deployBet);
+      expect(await bet.connect(otherAccount).getBet()).to.deep.equal([0, 0]);
+    });
+  })
 });
