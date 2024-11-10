@@ -210,6 +210,10 @@ describe("Bet", () => {
         REVERT_BET_CLOSED
       );
     });
+
+    it("Should emit Closing Event", async () => {
+      await expect(bet.connect(owner).close()).to.emit(bet, "CloseEvent");
+    });
   });
 
   describe("Canceling Betting", () => {
@@ -271,6 +275,10 @@ describe("Bet", () => {
       );
       expect(postBalance).to.equal(preBalance + BigInt(AMOUNT));
     });
+
+    it("Should emit Canceling Event", async () => {
+        await expect(bet.connect(owner).cancel()).to.emit(bet, "CancelEvent");
+      });
   });
 });
 //todo: add tests for canceling the event (inclusive of account getting their funds back)
