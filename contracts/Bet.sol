@@ -126,7 +126,6 @@ contract Bet is Ownable {
         require(bets[msg.sender].amount > 0, "You didn't bet");
 
         uint amount = bets[msg.sender].amount;
-        console.log("amount: %d", amount);
         delete bets[msg.sender];
 
         payable(msg.sender).transfer(amount);

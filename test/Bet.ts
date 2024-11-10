@@ -82,6 +82,19 @@ describe("Bet", () => {
             await expect(placeBet(otherAccount)).to.be.revertedWith(REVERT_BET_CLOSED);
         });
 
+    });
+
+    describe("Withdrawing", () => {
+        let bet: Bet, owner: HardhatEthersSigner, otherAccount: HardhatEthersSigner;
+
+        beforeEach(async () => {
+            ({ bet, owner, otherAccount } = await loadFixture(deployBet));
+        });
+
+        async function placeBet(account: HardhatEthersSigner, option = OPTION_INDEX, amount = AMOUNT) {
+            return bet.connect(account).bet(option, { value: amount });
+        }
+
         it("Should allow a bettor to withdraw their bet", async () => {
             const provider = hre.ethers.provider;
             await placeBet(otherAccount);
@@ -98,5 +111,9 @@ describe("Bet", () => {
                 expect(postWithdrawBalance).to.equal(expectedBalanceAfterWithdraw);
             }
         });
-    });
+        
+        it("Should not allow a bettor to withdraw if he has not bet", async () => {
+            await expect(bet.connect(otherAccount).withdrawBet()).to.be.revertedWith("You didn't bet");
+        })
+    })
 });
