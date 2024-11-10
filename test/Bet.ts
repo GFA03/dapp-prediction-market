@@ -115,5 +115,23 @@ describe("Bet", () => {
         it("Should not allow a bettor to withdraw if he has not bet", async () => {
             await expect(bet.connect(otherAccount).withdrawBet()).to.be.revertedWith("You didn't bet");
         })
+
+        it("Should not allow a bettor to withdraw twice", async () => {
+            await placeBet(otherAccount);
+            await bet.connect(otherAccount).withdrawBet();
+            await expect(bet.connect(otherAccount).withdrawBet()).to.be.revertedWith("You didn't bet");
+        });
+
+        it("Should not allow a bettor to withdraw after the event is canceled", async () => {
+            await placeBet(otherAccount);
+            await bet.connect(owner).cancel();
+            await expect(bet.connect(otherAccount).withdrawBet()).to.be.revertedWith("Betting is closed");
+        });
+
+        it("Should not allow a bettor to withdraw after the event is closed", async () => {
+            await placeBet(otherAccount);
+            await bet.connect(owner).close();
+            await expect(bet.connect(otherAccount).withdrawBet()).to.be.revertedWith("Betting is closed");
+        });
     })
 });
