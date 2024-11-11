@@ -2,6 +2,8 @@ import hre from "hardhat";
 import { expect } from "chai";
 import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 import { Bet_Factory, Bet_Factory__factory } from "../typechain-types";
+import { Bet, Bet__factory } from "../typechain-types";
+import { BaseContract } from "ethers";
 
 describe("Bet_Factory", () => {
   async function deployBetFactory() {
@@ -94,7 +96,7 @@ describe("Bet_Factory", () => {
         it("Should contain the 7th bet when offset is 6", async () => {
             const BetContract = await hre.ethers.getContractFactory("Bet");
             const bets = await bet_factory.getBets(1, 6);
-            const bet = BetContract.attach(bets[0]);
+            const bet: BaseContract = BetContract.attach(bets[0]);
             const name = await bet.name();
             expect(name).to.equal("Test 6");
         });
