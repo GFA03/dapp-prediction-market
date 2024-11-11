@@ -88,7 +88,7 @@ describe("Bet_Factory", () => {
         it("Should contain the bet with the appropiate offset", async () => {
             const BetContract = await hre.ethers.getContractFactory("Bet");
             const bets = await bet_factory.getBets(1, 0);
-            const bet = BetContract.attach(bets[0]);
+            const bet = BetContract.attach(bets[0]) as Bet;
             const name = await bet.name();
             expect(name).to.equal("Test 0");
         });
@@ -96,7 +96,7 @@ describe("Bet_Factory", () => {
         it("Should contain the 7th bet when offset is 6", async () => {
             const BetContract = await hre.ethers.getContractFactory("Bet");
             const bets = await bet_factory.getBets(1, 6);
-            const bet: BaseContract = BetContract.attach(bets[0]);
+            const bet: BaseContract = BetContract.attach(bets[0]) as Bet;
             const name = await bet.name();
             expect(name).to.equal("Test 6");
         });
