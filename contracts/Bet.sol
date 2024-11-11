@@ -53,6 +53,11 @@ contract Bet is Ownable {
         _;
     }
 
+    // Fallback function in case ether is sent anonymously
+    // function () external payable {
+
+    // }
+
     function getOptions() public view returns (string[] memory) {
         return options;
     }
