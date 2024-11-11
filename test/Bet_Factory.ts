@@ -120,6 +120,10 @@ describe("Bet_Factory", () => {
             const bets = await bet_factory.getBets(10, 30);
             expect(bets.length).to.equal(0);
         });
+
+        it("Should not allow to set the offset to a value greater than the bets count", async () => {
+            await expect(bet_factory.getBets(10, 31)).to.be.revertedWith("offset out of bounds");
+        });
      })
   });
 });
