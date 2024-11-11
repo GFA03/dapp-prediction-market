@@ -95,6 +95,10 @@ describe("Bet", () => {
         REVERT_BET_CLOSED
       );
     });
+
+    it("Should revert bet if value is 0", async () => {
+      await expect(bet.connect(otherAccount).bet(OPTION_INDEX, { value: 0 })).to.be.revertedWith("Value must be greater than 0");
+    });
   });
 
   describe("Withdrawing", () => {

@@ -45,7 +45,7 @@ contract Bet is Ownable {
     modifier canPlaceBet(uint _option) {
         require(status == Status.Open, "Betting is closed");
         require(_option < options.length, "Invalid option");
-        require(msg.value > 0, "Invalid amount");
+        require(msg.value > 0, "Value must be greater than 0");
         require(bets[msg.sender].amount == 0, "You already bet");
         _;
     }
@@ -69,13 +69,7 @@ contract Bet is Ownable {
         distributeRewards(_winningOption);
     }
 
-    function distributeRewards(uint _winningOption) private onlyOwner {
-        require(
-            status == Status.Finished,
-            "Betting must be finished to set a winner"
-        );
-        require(_winningOption < options.length, "Invalid option");
-
+    function distributeRewards(uint _winningOption) private {
         uint totalWinningAmount = 0;
 
         // Calculate total bet amount for the winning option
@@ -127,9 +121,7 @@ contract Bet is Ownable {
     }
 
     // function to return the bet amount to the bettor if the bet was canceled
-    function restoreFunds() private onlyOwner {
-        require(status == Status.Canceled, "Betting is not canceled");
-
+    function restoreFunds() private {
         for (uint i = 0; i < bettors.length; i++) {
             address bettor = bettors[i];
             BetRecord memory betRecord = bets[bettor];
