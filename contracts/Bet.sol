@@ -131,7 +131,7 @@ contract Bet is Ownable {
         }
     }
 
-    function withdrawBet() external {
+    function cashbackBet() external {
         require(status == Status.Open, "Betting is closed");
         require(bets[msg.sender].amount > 0, "You didn't bet");
 

@@ -121,7 +121,7 @@ describe("Bet", () => {
     //   await placeBet(otherAccount);
     //   const postBetBalance = await provider.getBalance(otherAccount.address);
 
-    //   const tx = await bet.connect(otherAccount).withdrawBet();
+    //   const tx = await bet.connect(otherAccount).cashbackBet();
     //   const receipt = await tx.wait();
     //   const postWithdrawBalance = await provider.getBalance(
     //     otherAccount.address
@@ -139,22 +139,22 @@ describe("Bet", () => {
     it("Should allow a bettor to withdraw their bet", async () => {
       await placeBet(otherAccount);
       
-      await expect(bet.connect(otherAccount).withdrawBet()).to.changeEtherBalances(
+      await expect(bet.connect(otherAccount).cashbackBet()).to.changeEtherBalances(
         [otherAccount, bet],
         [BigInt(AMOUNT), BigInt(-AMOUNT)]
       );
     });
 
     it("Should not allow a bettor to withdraw if he has not bet", async () => {
-      await expect(bet.connect(otherAccount).withdrawBet()).to.be.revertedWith(
+      await expect(bet.connect(otherAccount).cashbackBet()).to.be.revertedWith(
         "You didn't bet"
       );
     });
 
     it("Should not allow a bettor to withdraw twice", async () => {
       await placeBet(otherAccount);
-      await bet.connect(otherAccount).withdrawBet();
-      await expect(bet.connect(otherAccount).withdrawBet()).to.be.revertedWith(
+      await bet.connect(otherAccount).cashbackBet();
+      await expect(bet.connect(otherAccount).cashbackBet()).to.be.revertedWith(
         "You didn't bet"
       );
     });
@@ -162,7 +162,7 @@ describe("Bet", () => {
     it("Should not allow a bettor to withdraw after the event is canceled", async () => {
       await placeBet(otherAccount);
       await bet.connect(owner).cancel();
-      await expect(bet.connect(otherAccount).withdrawBet()).to.be.revertedWith(
+      await expect(bet.connect(otherAccount).cashbackBet()).to.be.revertedWith(
         "Betting is closed"
       );
     });
@@ -170,14 +170,14 @@ describe("Bet", () => {
     it("Should not allow a bettor to withdraw after the event is closed", async () => {
       await placeBet(otherAccount);
       await bet.connect(owner).close();
-      await expect(bet.connect(otherAccount).withdrawBet()).to.be.revertedWith(
+      await expect(bet.connect(otherAccount).cashbackBet()).to.be.revertedWith(
         "Betting is closed"
       );
     });
 
     it("Should emit a Cashback event", async () => {
       await placeBet(otherAccount);
-      await expect(bet.connect(otherAccount).withdrawBet())
+      await expect(bet.connect(otherAccount).cashbackBet())
         .to.emit(bet, "CashbackEvent")
         .withArgs(otherAccount.address, AMOUNT);
     });
@@ -212,7 +212,7 @@ describe("Bet", () => {
     it("Should not allow withdrawing after the event is closed", async () => {
       await bet.connect(otherAccount).bet(OPTION_INDEX, { value: AMOUNT });
       await bet.connect(owner).close();
-      await expect(bet.connect(otherAccount).withdrawBet()).to.be.revertedWith(
+      await expect(bet.connect(otherAccount).cashbackBet()).to.be.revertedWith(
         REVERT_BET_CLOSED
       );
     });
@@ -265,7 +265,7 @@ describe("Bet", () => {
     it("Should not allow withdrawing after the event is canceled", async () => {
       await bet.connect(otherAccount).bet(OPTION_INDEX, { value: AMOUNT });
       await bet.connect(owner).cancel();
-      await expect(bet.connect(otherAccount).withdrawBet()).to.be.revertedWith(
+      await expect(bet.connect(otherAccount).cashbackBet()).to.be.revertedWith(
         REVERT_BET_CLOSED
       );
     });
@@ -348,7 +348,7 @@ describe("Bet", () => {
       await placeBet(owner);
       await bet.connect(owner).close();
       await bet.connect(owner).setWinner(OPTION_INDEX);
-      await expect(bet.connect(owner).withdrawBet()).to.be.revertedWith(REVERT_BET_CLOSED);
+      await expect(bet.connect(owner).cashbackBet()).to.be.revertedWith(REVERT_BET_CLOSED);
     });
 
     it("Should not allow canceling after the winner is declared", async () => {
