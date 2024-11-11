@@ -15,4 +15,14 @@ describe("Bet_Factory", () => {
             expect(await bet_factory.getAddress()).to.properAddress;
         })
     })
+
+    describe('Creation of bets', () => { 
+        it("Should increase bets count", async () => {
+            const { bet_factory } = await loadFixture(deployBetFactory);
+            const prevCount = await bet_factory.betsCount();
+            const bet = await bet_factory.createBet('Test 1', ['Option 1', 'Option 2']);
+            const actualCount = await bet_factory.betsCount();
+            expect(actualCount).to.equal(prevCount + BigInt(1));
+        });
+     })
 })
