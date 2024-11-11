@@ -56,12 +56,22 @@ describe("Bet_Factory", () => {
 
       beforeEach(async () => {
         ({ bet_factory } = await loadFixture(deployBetFactory));
-        await addBet(bet_factory, 10);
+        await addBet(bet_factory, 30);
       });
 
         it("Should return 10 bets", async () => {
             const bets = await bet_factory.getBets(10, 0);
             expect(bets.length).to.equal(10);
+        });
+
+        it("Should return 20 bets when limit requested is 20", async () => {
+            const bets = await bet_factory.getBets(20, 0);
+            expect(bets.length).to.equal(20);
+        });
+
+        it("Should return 20 bets when limit requested is 30", async () => {
+            const bets = await bet_factory.getBets(30, 0);
+            expect(bets.length).to.equal(20);
         });
     });
   });
