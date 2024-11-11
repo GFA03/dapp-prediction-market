@@ -14,7 +14,7 @@ contract Bet_Factory {
         emit BetCreated(address(newBet));
     }
 
-    function getDeployedBets() public view returns (Bet[] memory) {
+    function getBets(uint256 limit, uint256 offset) public view returns (Bet[] memory) {
         return _deployedBets;
     }
 
