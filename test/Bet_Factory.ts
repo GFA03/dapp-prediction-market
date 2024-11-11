@@ -24,5 +24,10 @@ describe("Bet_Factory", () => {
             const actualCount = await bet_factory.betsCount();
             expect(actualCount).to.equal(prevCount + BigInt(1));
         });
+
+        it("Should emit the BetCreated event", async () => {
+            const { bet_factory } = await loadFixture(deployBetFactory);
+            await expect(bet_factory.createBet('Test 1', ['Option 1', 'Option 2'])).to.emit(bet_factory, 'BetCreated');
+        });
      })
 })
