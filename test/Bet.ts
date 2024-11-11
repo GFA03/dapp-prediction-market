@@ -380,10 +380,22 @@ describe("Bet", () => {
         [BigInt(AMOUNT * 2), BigInt(-AMOUNT * 2)]
       );
 
+      // Check otherAccount's withdrawal and confirm balance changes
       await expect(bet.connect(otherAccount).withdraw()).to.changeEtherBalances(
         [otherAccount, bet],
         [BigInt(AMOUNT * 2), BigInt(-AMOUNT * 2)]
       )
+    });
+
+    it("Should not allow a loser bettor to withdraw money", async () => {
+      await placeBet(user1); // user1 bets on option 0 with AMOUNT
+      await placeBet(user2, 1, AMOUNT * 2); // user2 bets on option 1 with 2 * AMOUNT
+
+      // Close and declare winner
+      await bet.connect(owner).close();
+      await bet.connect(owner).setWinner(OPTION_INDEX);
+
+      await expect(bet.connect(user2).withdraw()).to.be.revertedWith("No funds to withdraw");
     });
   });
 
