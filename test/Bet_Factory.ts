@@ -1,7 +1,7 @@
 import hre from "hardhat";
 import { expect } from "chai";
 import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
-import { Bet_Factory } from "../typechain-types";
+import { Bet_Factory, Bet_Factory__factory } from "../typechain-types";
 
 describe("Bet_Factory", () => {
   async function deployBetFactory() {
@@ -74,5 +74,50 @@ describe("Bet_Factory", () => {
             expect(bets.length).to.equal(20);
         });
     });
+
+    describe('Varying offsets', () => { 
+        let bet_factory: Bet_Factory;
+
+        beforeEach(async () => {
+            ({ bet_factory } = await loadFixture(deployBetFactory));
+            await addBet(bet_factory, 30);
+        });
+
+        it("Should contain the bet with the appropiate offset", async () => {
+            const BetContract = await hre.ethers.getContractFactory("Bet");
+            const bets = await bet_factory.getBets(1, 0);
+            const bet = BetContract.attach(bets[0]);
+            const name = await bet.name();
+            expect(name).to.equal("Test 0");
+        });
+
+        it("Should contain the 7th bet when offset is 6", async () => {
+            const BetContract = await hre.ethers.getContractFactory("Bet");
+            const bets = await bet_factory.getBets(1, 6);
+            const bet = BetContract.attach(bets[0]);
+            const name = await bet.name();
+            expect(name).to.equal("Test 6");
+        });
+
+        it('Should return 10 bets', async () => {
+            const bets = await bet_factory.getBets(10, 0);
+            expect(bets.length).to.equal(10);
+        });
+
+        it('Should return 10 bets when offset is 10', async () => {
+            const bets = await bet_factory.getBets(10, 10);
+            expect(bets.length).to.equal(10);
+        });
+
+        it('Should return 10 bets when offset is 20', async () => {
+            const bets = await bet_factory.getBets(10, 20);
+            expect(bets.length).to.equal(10);
+        });
+
+        it('Should return 0 bets when offset is 30', async () => {
+            const bets = await bet_factory.getBets(10, 30);
+            expect(bets.length).to.equal(0);
+        });
+     })
   });
 });

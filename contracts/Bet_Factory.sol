@@ -16,12 +16,21 @@ contract Bet_Factory {
     }
 
     function getBets(uint256 limit, uint256 offset) public view returns (Bet[] memory coll) {
+        require(offset <= betsCount(), "offset out of bounds");
+        
+        // size is the number of bets left after the offset
+        uint256 size = betsCount() - offset;
+
         // size should be the smaller of the count or the limit
-        uint256 size = betsCount() < limit ? betsCount() : limit;
+        size = size < limit ? size : limit;
 
         // size should not exceed the maxLimit
         size = size < _maxLimit ? size : _maxLimit;
         coll = new Bet[](size);
+
+        for (uint256 i = 0; i < size; i++) {
+            coll[i] = _deployedBets[offset + i];
+        }
         
         return coll;
     }
