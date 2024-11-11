@@ -101,7 +101,7 @@ describe("Bet", () => {
     });
   });
 
-  describe("Withdrawing", () => {
+  describe("Cashback", () => {
     let bet: Bet, owner: HardhatEthersSigner, otherAccount: HardhatEthersSigner;
 
     beforeEach(async () => {
@@ -136,7 +136,7 @@ describe("Bet", () => {
     //   }
     // });
 
-    it("Should allow a bettor to withdraw their bet", async () => {
+    it("Should allow a bettor to cashback their bet", async () => {
       await placeBet(otherAccount);
       
       await expect(bet.connect(otherAccount).cashbackBet()).to.changeEtherBalances(
@@ -145,13 +145,13 @@ describe("Bet", () => {
       );
     });
 
-    it("Should not allow a bettor to withdraw if he has not bet", async () => {
+    it("Should not allow a bettor to cashback if he has not bet", async () => {
       await expect(bet.connect(otherAccount).cashbackBet()).to.be.revertedWith(
         "You didn't bet"
       );
     });
 
-    it("Should not allow a bettor to withdraw twice", async () => {
+    it("Should not allow a bettor to cashback twice", async () => {
       await placeBet(otherAccount);
       await bet.connect(otherAccount).cashbackBet();
       await expect(bet.connect(otherAccount).cashbackBet()).to.be.revertedWith(
@@ -159,7 +159,7 @@ describe("Bet", () => {
       );
     });
 
-    it("Should not allow a bettor to withdraw after the event is canceled", async () => {
+    it("Should not allow a bettor to cashback after the event is canceled", async () => {
       await placeBet(otherAccount);
       await bet.connect(owner).cancel();
       await expect(bet.connect(otherAccount).cashbackBet()).to.be.revertedWith(
@@ -167,7 +167,7 @@ describe("Bet", () => {
       );
     });
 
-    it("Should not allow a bettor to withdraw after the event is closed", async () => {
+    it("Should not allow a bettor to cashback after the event is closed", async () => {
       await placeBet(otherAccount);
       await bet.connect(owner).close();
       await expect(bet.connect(otherAccount).cashbackBet()).to.be.revertedWith(
@@ -313,7 +313,7 @@ describe("Bet", () => {
       await placeBet(owner);
       await bet.connect(owner).close();
       await bet.connect(owner).setWinner(OPTION_INDEX);
-      expect(await bet.status()).to.equal(3); // Status.WinnerDeclared is 3
+      expect(await bet.status()).to.equal(3); // Status.Finished is 3
     });
 
     it("Should not allow the owner to declare a winner if there are no winning bets", async () => {
@@ -325,7 +325,7 @@ describe("Bet", () => {
       await expect(bet.connect(owner).setWinner(OPTION_INDEX)).to.be.revertedWith("Betting must be closed to set a winner");
     });
 
-    it("Should not allow the owner to declare a winner if the winner is invalid", async () => {
+    it("Should not allow the owner to declare a winner if the winning option is invalid", async () => {
       await placeBet(owner);
       await bet.connect(owner).close();
       await expect(bet.connect(owner).setWinner(INVALID_OPTION_INDEX)).to.be.revertedWith("Invalid option");
@@ -344,14 +344,14 @@ describe("Bet", () => {
       await expect(bet.connect(otherAccount).bet(OPTION_INDEX, { value: AMOUNT })).to.be.revertedWith(REVERT_BET_CLOSED);
     });
 
-    it("Should not allow withdrawing after the winner is declared", async () => {
+    it("Should not allow cashback after the winner is declared", async () => {
       await placeBet(owner);
       await bet.connect(owner).close();
       await bet.connect(owner).setWinner(OPTION_INDEX);
       await expect(bet.connect(owner).cashbackBet()).to.be.revertedWith(REVERT_BET_CLOSED);
     });
 
-    it("Should not allow canceling after the winner is declared", async () => {
+    it("Should not allow canceling the event after the winner is declared", async () => {
       await placeBet(owner);
       await bet.connect(owner).close();
       await bet.connect(owner).setWinner(OPTION_INDEX);
@@ -366,14 +366,24 @@ describe("Bet", () => {
     });
 
     it("Should return money to the winning bettors", async () => {
-      await placeBet(user1);
-      await placeBet(user2, 1, AMOUNT * 2);
-      await placeBet(otherAccount);
+      await placeBet(user1); // user1 bets on option 0 with AMOUNT
+      await placeBet(user2, 1, AMOUNT * 2); // user2 bets on option 1 with 2 * AMOUNT
+      await placeBet(otherAccount); // otherAccount bets on option 0 with AMOUNT
+
+      // Close and declare winner
       await bet.connect(owner).close();
-      await expect(bet.connect(owner).setWinner(OPTION_INDEX)).to.changeEtherBalances(
-        [user1, otherAccount, bet],
-        [BigInt(AMOUNT * 2), BigInt(AMOUNT * 2), BigInt(-AMOUNT * 4)]
+      await bet.connect(owner).setWinner(OPTION_INDEX);
+
+      // Check user1's withdrawal and confirm balance changes
+      await expect(bet.connect(user1).withdraw()).to.changeEtherBalances(
+        [user1, bet],
+        [BigInt(AMOUNT * 2), BigInt(-AMOUNT * 2)]
       );
+
+      await expect(bet.connect(otherAccount).withdraw()).to.changeEtherBalances(
+        [otherAccount, bet],
+        [BigInt(AMOUNT * 2), BigInt(-AMOUNT * 2)]
+      )
     });
   });
 

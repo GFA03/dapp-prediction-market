@@ -23,6 +23,9 @@ contract Bet is Ownable {
     mapping(address => BetRecord) public bets;
     address[] public bettors;
 
+    // mapping for Withdrawal Pattern (how much money each bettor is to take)
+    mapping(address => uint) public balances;
+
     event BetEvent(
         address indexed bettor,
         uint indexed option,
@@ -80,7 +83,6 @@ contract Bet is Ownable {
         }
 
         require(totalWinningAmount > 0, "No winning bets");
-
         uint totalAmount = address(this).balance;
 
         // Distribute rewards to winners
@@ -91,7 +93,8 @@ contract Bet is Ownable {
                     totalAmount,
                     totalWinningAmount
                 );
-                payable(bettors[i]).transfer(payout);
+                balances[bettors[i]] += payout;
+                emit WinnerEvent(bettors[i], payout);
             }
         }
     }
@@ -100,9 +103,16 @@ contract Bet is Ownable {
         return (betAmount * totalAmount) / totalWinningAmount;
     }
 
-    function getBet() public view returns (uint, uint) {
+    function getBet() external view returns (uint, uint) {
         BetRecord memory betRecord = bets[msg.sender];
         return (betRecord.option, betRecord.amount);
+    }
+
+    function withdraw() external {
+        uint amount = balances[msg.sender];
+        require(amount > 0, "No funds to withdraw");
+        balances[msg.sender] = 0;
+        payable(msg.sender).transfer(amount);
     }
 
     function close() public onlyOwner {
