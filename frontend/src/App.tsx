@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { requestAccount } from "./utils/contractServices";
 import { ToastContainer } from "react-toastify";
+import ConnectWalletPage from "./components/ConnectWalletPage";
 
 function App() {
-  const [account, setAccount] = useState(null);
-  
+  const [account, setAccount] = useState<string | null>(null);
+
   useEffect(() => {
     const fetchCurAccount = async () => {
       const account = await requestAccount();
+      console.log(`account in fetchCurAccount: ${account}`);
       setAccount(account);
     };
     fetchCurAccount();
@@ -16,6 +18,7 @@ function App() {
   useEffect(() => {
     const handleAccountChanged = (newAccounts: any) =>
       setAccount(newAccounts.length > 0 ? newAccounts[0] : null);
+
     if (window.ethereum) {
       window.ethereum.on("accountsChanged", handleAccountChanged);
     }
@@ -28,7 +31,7 @@ function App() {
     <div className="app">
       <ToastContainer />
       {!account ? (
-        <p> You do not have account </p>
+        <ConnectWalletPage setAccount={setAccount} />
       ) : (
         <p> You do have an account </p>
       )}
