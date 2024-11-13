@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { requestAccount } from "./utils/contractServices";
 import { ToastContainer } from "react-toastify";
 import ConnectWalletPage from "./components/ConnectWalletPage";
+import BetFactoryInfo from "./components/BetFactoryInfo";
 
 function App() {
   const [account, setAccount] = useState<string | null>(null);
@@ -33,7 +34,9 @@ function App() {
       {!account ? (
         <ConnectWalletPage setAccount={setAccount} />
       ) : (
-        <p> You do have an account </p>
+        <div>
+          <BetFactoryInfo account={account} />
+        </div>
       )}
     </div>
   );
