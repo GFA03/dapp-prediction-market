@@ -3,6 +3,14 @@ import "@nomicfoundation/hardhat-toolbox";
 
 const config: HardhatUserConfig = {
   solidity: "0.8.27",
+  paths: {
+    artifacts: './frontend/src/artifacts',
+  },
+  networks: {
+    hardhat: {
+      chainId: 1337,
+    },
+  }
 };
 
 export default config;
