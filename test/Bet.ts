@@ -29,6 +29,18 @@ describe("Bet", () => {
       expect(await bet.name()).to.equal(name);
       expect(await bet.getOptions()).to.deep.equal(options);
     });
+
+    it("Should not allow deployment if less than 2 options provided", async () => {
+      const name = "Test Bet";
+      const options = ["Option 1"];
+      await expect(hre.ethers.deployContract("Bet", [name, options])).to.be.revertedWith("At least 2 options required");
+    });
+
+    it("Should not allow deployment if more than 8 options provided", async () => {
+      const name = "Test Bet";
+      const options = ["Option 1", "Option 2", "Option 3", "Option 4", "Option 5", "Option 6", "Option 7", "Option 8", "Option 9"];
+      await expect(hre.ethers.deployContract("Bet", [name, options])).to.be.revertedWith("Maximum 8 options allowed");
+    });
   });
 
   describe("Betting", () => {

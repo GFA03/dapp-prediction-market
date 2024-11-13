@@ -3,6 +3,8 @@ pragma solidity ^0.8.27;
 import "hardhat/console.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
+// pune limita pe optiuni (deocamdata poti pune infinit)
+
 contract Bet is Ownable {
     enum Status {
         Open,
@@ -40,6 +42,8 @@ contract Bet is Ownable {
         string memory _name,
         string[] memory _options
     ) Ownable(msg.sender) {
+        require(_options.length > 1, "At least 2 options required");
+        require(_options.length <= 8, "Maximum 8 options allowed");
         status = Status.Open;
         name = _name;
         options = _options;
