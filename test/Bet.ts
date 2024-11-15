@@ -16,7 +16,7 @@ describe("Bet", () => {
     const name = "Test Bet";
     const options = ["Option 1", "Option 2"];
     const [owner, otherAccount, user1, user2] = await hre.ethers.getSigners();
-    const bet = await hre.ethers.deployContract("Bet", [name, options]);
+    const bet = await hre.ethers.deployContract("Bet", [name, options, owner.address]);
     return { bet, name, options, owner, otherAccount, user1, user2 };
   }
 
@@ -33,13 +33,15 @@ describe("Bet", () => {
     it("Should not allow deployment if less than 2 options provided", async () => {
       const name = "Test Bet";
       const options = ["Option 1"];
-      await expect(hre.ethers.deployContract("Bet", [name, options])).to.be.revertedWith("At least 2 options required");
+      const [owner] = await hre.ethers.getSigners();
+      await expect(hre.ethers.deployContract("Bet", [name, options, owner.address])).to.be.revertedWith("At least 2 options required");
     });
 
     it("Should not allow deployment if more than 8 options provided", async () => {
       const name = "Test Bet";
       const options = ["Option 1", "Option 2", "Option 3", "Option 4", "Option 5", "Option 6", "Option 7", "Option 8", "Option 9"];
-      await expect(hre.ethers.deployContract("Bet", [name, options])).to.be.revertedWith("Maximum 8 options allowed");
+      const [owner] = await hre.ethers.getSigners();
+      await expect(hre.ethers.deployContract("Bet", [name, options, owner.address])).to.be.revertedWith("Maximum 8 options allowed");
     });
   });
 

@@ -40,13 +40,15 @@ contract Bet is Ownable {
 
     constructor(
         string memory _name,
-        string[] memory _options
+        string[] memory _options,
+        address _betCreator
     ) Ownable(msg.sender) {
         require(_options.length > 1, "At least 2 options required");
         require(_options.length <= 8, "Maximum 8 options allowed");
         status = Status.Open;
         name = _name;
         options = _options;
+        transferOwnership(_betCreator);
     }
 
     modifier canPlaceBet(uint _option) {

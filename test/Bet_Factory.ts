@@ -7,8 +7,9 @@ import { BaseContract } from "ethers";
 
 describe("Bet_Factory", () => {
   async function deployBetFactory() {
-    const bet_factory = await hre.ethers.deployContract("Bet_Factory", []);
-    return { bet_factory };
+    const [ owner ] = await hre.ethers.getSigners();
+    const bet_factory = await hre.ethers.deployContract("Bet_Factory", [], { from: owner.address }) as Bet_Factory;
+    return { bet_factory, owner };
   }
 
   async function addBet(bet_factory: Bet_Factory, count: number) {
@@ -43,6 +44,20 @@ describe("Bet_Factory", () => {
       await expect(
         bet_factory.createBet("Test 1", ["Option 1", "Option 2"])
       ).to.emit(bet_factory, "BetCreated");
+    });
+
+    it("Should have the right owner", async () => {
+      const { bet_factory, owner } = await loadFixture(deployBetFactory);
+      
+      const betTransaction = await bet_factory.createBet("Test 1", [
+        "Option 1",
+        "Option 2",
+      ]);
+      const [createdBetAddress] = await bet_factory.getBets(1, 0);
+      const Bet = await hre.ethers.getContractFactory("Bet");
+      const bet = Bet.attach(createdBetAddress) as Bet;
+      const betOwner = await bet.owner();
+      expect(betOwner).to.equal(owner.address);
     });
   });
 

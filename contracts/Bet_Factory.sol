@@ -10,7 +10,7 @@ contract Bet_Factory {
     event BetCreated(address indexed betAddress);
 
     function createBet(string memory _name, string[] memory _options) public {
-        Bet newBet = new Bet(_name, _options);
+        Bet newBet = new Bet(_name, _options, msg.sender);
         _deployedBets.push(newBet);
         emit BetCreated(address(newBet));
     }
