@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { createBet, getBetDetails, getBetsAddresses, getBetsCount } from "../utils/contractServices";
+import { Box, Button, TextField, Typography } from "@mui/material";
+import BetCard from "./BetCard";
 
 type BetDetails = {
   name: string;
@@ -37,8 +39,7 @@ const BetActions = () => {
           return betDetails;
         })
       );
-  
-      console.log("Bet details in BETACTIONS:", betsDetails);
+
       setBets(betsDetails);
     } catch (error: any) {
       console.error("Error fetching bet details:", error.message);
@@ -66,54 +67,56 @@ const BetActions = () => {
     }
   };
 
-  return (
-    <div className="bet-actions">
-      <h2>Create a Bet</h2>
-      <div>
-        <label>
-          Bet Title:
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Enter the title of the bet"
-          />
-        </label>
-      </div>
-      <div>
-        <label>
-          Bet Option:
-          <input
-            type="text"
-            value={optionInput}
-            onChange={(e) => setOptionInput(e.target.value)}
-            placeholder="Enter an option"
-          />
-        </label>
-        <button onClick={handleAddOption}>Add Option</button>
-      </div>
-      <div>
-        <h4>Options:</h4>
-        <ul>
+    return (
+    <Box sx={{ padding: 3 }}>
+      <Typography variant="h4" gutterBottom>
+        Create a Bet
+      </Typography>
+      <Box sx={{ marginBottom: 3 }}>
+        <TextField
+          label="Bet Title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          fullWidth
+          margin="normal"
+        />
+        <TextField
+          label="Bet Option"
+          value={optionInput}
+          onChange={(e) => setOptionInput(e.target.value)}
+          fullWidth
+          margin="normal"
+        />
+        <Button variant="contained" color="primary" onClick={handleAddOption}>
+          Add Option
+        </Button>
+        <Typography variant="h6" sx={{ marginTop: 2 }}>
+          Options:
+        </Typography>
+        <Box>
           {options.map((option, index) => (
-            <li key={index}>{option}</li>
+            <Typography key={index} variant="body1">
+              - {option}
+            </Typography>
           ))}
-        </ul>
-      </div>
-      <button onClick={handleCreateBet}>Create Bet</button>
+        </Box>
+      </Box>
+      <Button variant="contained" color="success" onClick={handleCreateBet}>
+        Create Bet
+      </Button>
 
-      <h3>Total Bets: {betCount}</h3>
-      <div>
-        <h3>Existing Bets:</h3>
-        <ul>
-          {bets.map((bet: any, index: number) => (
-            <li key={index}>
-              <strong>{bet.name}</strong> - Options: {bet.options.join(", ")}
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
+      <Typography variant="h5" sx={{ marginTop: 4 }}>
+        Total Bets: {betCount}
+      </Typography>
+      <Box>
+        <Typography variant="h5" gutterBottom>
+          Existing Bets:
+        </Typography>
+        {bets.map((bet, index) => (
+          <BetCard key={index} name={bet.name} options={bet.options} />
+        ))}
+      </Box>
+    </Box>
   );
 };
 
