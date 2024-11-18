@@ -6,7 +6,7 @@ const BetActions = () => {
   const [options, setOptions] = useState<string[]>([]);
   const [optionInput, setOptionInput] = useState("");
   const [bets, setBets] = useState([]);
-  const [betCount, setBetCount] = useState(0);
+  const [betCount, setBetCount] = useState<number>(0);
 
   useEffect(() => {
     fetchBetsCount();
@@ -15,6 +15,9 @@ const BetActions = () => {
 
   const fetchBetsCount = async () => {
     const count = await getBetsCount();
+    console.log(`Fetched bets! Count: ${count}`);
+    console.log(typeof count);
+    
     setBetCount(count);
   };
 
@@ -23,7 +26,9 @@ const BetActions = () => {
     if (!fetchedBets) {
       return;
     }
-    setBets(fetchedBets);
+    console.log("Fetched bets:", fetchedBets);
+    console.log(typeof fetchedBets);
+    // setBets(fetchedBets);
   };
 
   const handleCreateBet = async () => {
@@ -86,7 +91,7 @@ const BetActions = () => {
       <button onClick={handleCreateBet}>Create Bet</button>
 
       <h3>Total Bets: {betCount}</h3>
-      <div>
+      {/* <div>
         <h3>Existing Bets:</h3>
         <ul>
           {bets.map((bet: any, index: number) => (
@@ -95,7 +100,7 @@ const BetActions = () => {
             </li>
           ))}
         </ul>
-      </div>
+      </div> */}
     </div>
   );
 };

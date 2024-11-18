@@ -11,20 +11,36 @@ declare global {
 
 let provider: BrowserProvider | null = null;
 let signer: JsonRpcSigner | null = null;
-let contract: Contract | null = null;
+let betFactoryContract: Contract | null = null;
 
 const initialize = async () => {
   console.log("INITIALIZE");
   if (window.ethereum !== null) {
     provider = new BrowserProvider(window.ethereum as MetaMaskInpageProvider);
     signer = await provider.getSigner();
-    contract = new Contract(CONTRACT_ADDRESS, Bet_Factory.abi, signer);
+    betFactoryContract = new Contract(CONTRACT_ADDRESS, Bet_Factory.abi, signer);
     console.log('INITIALIZATION DONE 🟢');
   } else {
     console.log('INITIALIZATION ERROR ⭕');
     console.error("Please install MetaMask!");
   }
 };
+
+const initializeBetContract = async (address: string) => {
+  if (!provider) {
+    await initialize();
+  }
+
+  try {
+    console.log("Initializing bet contract with address:", address);
+    const betContract = new Contract(address, Bet_Factory.abi, signer);
+    console.log("Bet contract initialized 🟢");
+    return betContract;
+  } catch (error: any) {
+    console.error("Error initializing bet contract:", error.message);
+    return null;
+  }
+}
 
 // Function to request single account
 export const requestAccount = async () => {
@@ -66,14 +82,14 @@ export const getBalance = async (account: string) => {
 };
 
 export const createBet = async (title: string, options: string[]) => {
-  if (!contract) {
+  if (!betFactoryContract) {
     await initialize();
   }
 
   try {
     console.log("Creating bet with title:", title, "and options:", options);
-    const ethValue = parseEther('0.1');
-    const tx = await contract!.createBet(title, options, {value: ethValue });
+    const tx = await betFactoryContract!.createBet(title, options);
+    console.log(tx);
     await tx.wait();
     console.log("Bet created successfully 🟢");
   } catch (error: any) {
@@ -83,14 +99,14 @@ export const createBet = async (title: string, options: string[]) => {
 }
 
 export const getBets = async (limit: number, offset: number) => {
-  if (!contract) {
+  if (!betFactoryContract) {
     await initialize();
   }
 
   try {
     console.log("Getting bets");
-    console.log(contract);
-    const bets = await contract!.getBets(limit, offset);
+    console.log(betFactoryContract);
+    const bets = await betFactoryContract!.getBets(limit, offset);
     console.log("Bets DONE 🟢:");
     console.log(bets);
     return bets;
@@ -101,18 +117,40 @@ export const getBets = async (limit: number, offset: number) => {
 }
 
 export const getBetsCount = async () => {
-  if (!contract) {
+  if (!betFactoryContract) {
     await initialize();
   }
 
   try {
     console.log("Getting bets length");
-    const length = await contract!.betsCount();
+    const length = await betFactoryContract!.betsCount();
     console.log("Bets length DONE 🟢:");
     console.log(length);
-    return length;
+    // transform length from bigint to number
+    const count = Number(length);
+    return count;
   } catch (error: any) {
     console.error("Error getting bets length:", error.message);
     return 0;
+  }
+}
+
+export const getBetName = async (address: string) => {
+  const betContract = await initializeBetContract(address);
+
+  if (betContract === null) {
+    console.log("Bet contract is null ⭕");
+    return "";
+  }
+
+  try {
+    console.log("Getting bet name for address:", address);
+    const name = await betContract!.name();
+    console.log("Bet name DONE 🟢:");
+    console.log(name);
+    return name;
+  } catch (error: any) {
+    console.error("Error getting bet name:", error.message);
+    return "";
   }
 }
