@@ -64,6 +64,10 @@ contract Bet is Ownable {
 
     // }
 
+    function getName() public view returns (string memory) {
+        return name;
+    }
+
     function getOptions() public view returns (string[] memory) {
         return options;
     }

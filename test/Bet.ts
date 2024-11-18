@@ -26,7 +26,7 @@ describe("Bet", () => {
       expect(await bet.getAddress()).to.properAddress;
       expect(await bet.owner()).to.equal(owner.address);
       expect(await bet.status()).to.equal(0); // Status.Open is 0
-      expect(await bet.name()).to.equal(name);
+      expect(await bet.getName()).to.equal(name);
       expect(await bet.getOptions()).to.deep.equal(options);
     });
 

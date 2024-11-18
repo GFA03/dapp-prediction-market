@@ -1,5 +1,6 @@
 import Bet_Factory from "../artifacts/contracts/Bet_Factory.sol/Bet_Factory.json";
-import { BrowserProvider, Contract, formatEther, JsonRpcSigner, parseEther } from "ethers";
+import Bet from "../artifacts/contracts/Bet.sol/Bet.json";
+import { BrowserProvider, Contract, formatEther, JsonRpcSigner } from "ethers";
 import { CONTRACT_ADDRESS } from "./constants";
 import { MetaMaskInpageProvider } from "@metamask/providers";
 
@@ -14,7 +15,6 @@ let signer: JsonRpcSigner | null = null;
 let betFactoryContract: Contract | null = null;
 
 const initialize = async () => {
-  console.log("INITIALIZE");
   if (window.ethereum !== null) {
     provider = new BrowserProvider(window.ethereum as MetaMaskInpageProvider);
     signer = await provider.getSigner();
@@ -32,8 +32,7 @@ const initializeBetContract = async (address: string) => {
   }
 
   try {
-    console.log("Initializing bet contract with address:", address);
-    const betContract = new Contract(address, Bet_Factory.abi, signer);
+    const betContract = new Contract(address, Bet.abi, signer);
     console.log("Bet contract initialized 🟢");
     return betContract;
   } catch (error: any) {
@@ -45,13 +44,10 @@ const initializeBetContract = async (address: string) => {
 // Function to request single account
 export const requestAccount = async () => {
   if (!provider) {
-    console.log("REQUEST ACCOUNT Initialize!");
     await initialize();
-    console.log(provider);
   }
 
   try {
-    console.log("REQUEST ACCOUNT TRY BLOCK");
     const accounts = await provider!.send("eth_requestAccounts", []);
     console.log('REQUEST ACCOUNT DONE 🟢');
     return accounts[0]; // Return the first account
@@ -70,7 +66,6 @@ export const getBalance = async (account: string) => {
   }
 
   try {
-    console.log("Getting balance for account:", account);
     const balance = await provider!.getBalance(account);
     console.log("Balance DONE 🟢");
     const balanceInEth = formatEther(balance);
@@ -87,9 +82,7 @@ export const createBet = async (title: string, options: string[]) => {
   }
 
   try {
-    console.log("Creating bet with title:", title, "and options:", options);
     const tx = await betFactoryContract!.createBet(title, options);
-    console.log(tx);
     await tx.wait();
     console.log("Bet created successfully 🟢");
   } catch (error: any) {
@@ -98,14 +91,12 @@ export const createBet = async (title: string, options: string[]) => {
   }
 }
 
-export const getBets = async (limit: number, offset: number) => {
+export const getBetsAddresses = async (limit: number, offset: number) => {
   if (!betFactoryContract) {
     await initialize();
   }
 
   try {
-    console.log("Getting bets");
-    console.log(betFactoryContract);
     const bets = await betFactoryContract!.getBets(limit, offset);
     console.log("Bets DONE 🟢:");
     console.log(bets);
@@ -122,10 +113,8 @@ export const getBetsCount = async () => {
   }
 
   try {
-    console.log("Getting bets length");
     const length = await betFactoryContract!.betsCount();
-    console.log("Bets length DONE 🟢:");
-    console.log(length);
+    console.log("Bets length DONE 🟢");
     // transform length from bigint to number
     const count = Number(length);
     return count;
@@ -135,7 +124,7 @@ export const getBetsCount = async () => {
   }
 }
 
-export const getBetName = async (address: string) => {
+export const getBetDetails = async (address: string) => {
   const betContract = await initializeBetContract(address);
 
   if (betContract === null) {
@@ -144,13 +133,34 @@ export const getBetName = async (address: string) => {
   }
 
   try {
-    console.log("Getting bet name for address:", address);
-    const name = await betContract!.name();
-    console.log("Bet name DONE 🟢:");
-    console.log(name);
+    console.log("Getting bet name and options for address:", address);
+    const name = await getBetName(betContract);
+    const options = await getBetOptions(betContract);
+    console.log("Bet details DONE 🟢");
+    console.log(name, options);
+    return {name, options};
+  } catch (error: any) {
+    console.error("Error getting bet name:", error.message);
+    return "";
+  }
+}
+
+const getBetName = async (betContract: Contract) => {
+  try {
+    const name = await betContract.getName();
     return name;
   } catch (error: any) {
     console.error("Error getting bet name:", error.message);
     return "";
+  }
+}
+
+const getBetOptions = async (betContract: Contract) => {
+  try {
+    const options = await betContract.getOptions();
+    return options;
+  } catch (error: any) {
+    console.error("Error getting bet options:", error.message);
+    return [];
   }
 }

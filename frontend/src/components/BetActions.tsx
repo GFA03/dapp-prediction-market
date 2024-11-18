@@ -1,34 +1,48 @@
 import React, { useState, useEffect } from "react";
-import { createBet, getBets, getBetsCount } from "../utils/contractServices";
+import { createBet, getBetDetails, getBetsAddresses, getBetsCount } from "../utils/contractServices";
+
+type BetDetails = {
+  name: string;
+  options: string[];
+};
 
 const BetActions = () => {
   const [title, setTitle] = useState("");
   const [options, setOptions] = useState<string[]>([]);
   const [optionInput, setOptionInput] = useState("");
-  const [bets, setBets] = useState([]);
+  const [bets, setBets] = useState<BetDetails[]>([]);
   const [betCount, setBetCount] = useState<number>(0);
 
   useEffect(() => {
     fetchBetsCount();
-    // fetchBets();
+    fetchBets();
   }, []);
 
   const fetchBetsCount = async () => {
     const count = await getBetsCount();
-    console.log(`Fetched bets! Count: ${count}`);
-    console.log(typeof count);
-    
     setBetCount(count);
   };
 
   const fetchBets = async () => {
-    const fetchedBets = await getBets(10, 0); // Fetch first 10 bets
+    const fetchedBets = await getBetsAddresses(10, 0); // Fetch first 10 bets
     if (!fetchedBets) {
       return;
     }
-    console.log("Fetched bets:", fetchedBets);
-    console.log(typeof fetchedBets);
-    // setBets(fetchedBets);
+
+    try {
+      // Wait for all bet details to resolve
+      const betsDetails = await Promise.all(
+        fetchedBets.map(async (bet: string) => {
+          const betDetails = await getBetDetails(bet);
+          return betDetails;
+        })
+      );
+  
+      console.log("Bet details in BETACTIONS:", betsDetails);
+      setBets(betsDetails);
+    } catch (error: any) {
+      console.error("Error fetching bet details:", error.message);
+    }
   };
 
   const handleCreateBet = async () => {
@@ -36,8 +50,6 @@ const BetActions = () => {
       alert("Please enter a title and at least two options or maximum 8 options.");
       return;
     }
-
-    console.log("Creating bet with title:", title, "and options:", options);
 
     await createBet(title, options);
     setTitle("");
@@ -91,16 +103,16 @@ const BetActions = () => {
       <button onClick={handleCreateBet}>Create Bet</button>
 
       <h3>Total Bets: {betCount}</h3>
-      {/* <div>
+      <div>
         <h3>Existing Bets:</h3>
         <ul>
           {bets.map((bet: any, index: number) => (
             <li key={index}>
-              <strong>{bet.title}</strong> - Options: {bet.options.join(", ")}
+              <strong>{bet.name}</strong> - Options: {bet.options.join(", ")}
             </li>
           ))}
         </ul>
-      </div> */}
+      </div>
     </div>
   );
 };
