@@ -2,10 +2,11 @@
 pragma solidity ^0.8.27;
 import "hardhat/console.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "./IWithdrawal.sol";
 
 // pune limita pe optiuni (deocamdata poti pune infinit)
 
-contract Bet is Ownable {
+contract Bet is Ownable, IWithdrawal {
     enum Status {
         Open,
         Closed,
