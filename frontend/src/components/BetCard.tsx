@@ -56,7 +56,7 @@ const BetCard: React.FC<BetCardProps> = ({ name, options, address, userBalance, 
           ))}
         </Grid>
 
-        {selectedOption && (
+        {selectedOption != null && (
           <Box mt={2}>
             <Typography variant="subtitle1" color="text.secondary">
               Your balance: {userBalance} ETH
