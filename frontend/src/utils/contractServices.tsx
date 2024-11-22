@@ -138,7 +138,7 @@ export const getBetDetails = async (address: string) => {
     const options = await getBetOptions(betContract);
     console.log("Bet details DONE 🟢");
     console.log(name, options);
-    return {name, options};
+    return {name, options, address};
   } catch (error: any) {
     console.error("Error getting bet name:", error.message);
     return "";
@@ -164,3 +164,22 @@ const getBetOptions = async (betContract: Contract) => {
     return [];
   }
 }
+
+export const placeBet = async (address: string, option: number, amount: string) => {
+  const betContract = await initializeBetContract(address);
+
+  if (!betContract) {
+    console.error("Bet contract not initialized ⭕");
+    return false;
+  }
+
+  try {
+    const tx = await betContract.bet(option, { value: amount });
+    await tx.wait();
+    console.log(`Bet placed successfully 🟢 Option: ${option}, Amount: ${amount}`);
+    return true;
+  } catch (error: any) {
+    console.error("Error placing bet:", error.message);
+    return false;
+  }
+};

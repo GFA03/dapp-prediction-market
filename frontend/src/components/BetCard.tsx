@@ -1,12 +1,32 @@
-import React from "react";
-import { Card, CardContent, Typography, List, ListItem } from "@mui/material";
+import React, { useState } from "react";
+import { Card, CardContent, Typography, Button, Grid, TextField, Box } from "@mui/material";
 
 type BetCardProps = {
   name: string;
   options: string[];
+  address: string;
+  userBalance: string;
+  onPlaceBet: (address: string, option: number, amount: string) => void;
 };
 
-const BetCard: React.FC<BetCardProps> = ({ name, options }) => {
+const BetCard: React.FC<BetCardProps> = ({ name, options, address, userBalance, onPlaceBet }) => {
+  const [selectedOption, setSelectedOption] = useState<number | null>(null);
+  const [betAmount, setBetAmount] = useState<string>("");
+
+  const handleOptionClick = (option: number) => {
+    setSelectedOption(option);
+    setBetAmount(""); // Reset the amount field when switching options
+  };
+
+  const handlePlaceBet = () => {
+    if (!betAmount || parseFloat(betAmount) <= 0) {
+      alert("Please enter a valid amount to bet.");
+      return;
+    }
+    onPlaceBet(address, selectedOption!, betAmount);
+    setSelectedOption(null); // Hide the input after placing a bet
+  };
+
   return (
     <Card
       sx={{
@@ -14,22 +34,50 @@ const BetCard: React.FC<BetCardProps> = ({ name, options }) => {
         padding: 2,
         boxShadow: 3,
         maxWidth: 400,
+        textAlign: "center",
       }}
     >
       <CardContent>
         <Typography variant="h6" component="div" gutterBottom>
           {name}
         </Typography>
-        <Typography variant="subtitle1" color="text.secondary">
-          Options:
-        </Typography>
-        <List>
+        <Grid container spacing={2}>
           {options.map((option, index) => (
-            <ListItem key={index} sx={{ paddingLeft: 0 }}>
-              - {option}
-            </ListItem>
+            <Grid item xs={6} key={index}>
+              <Button
+                variant="outlined"
+                color="primary"
+                fullWidth
+                onClick={() => handleOptionClick(index)}
+              >
+                {option}
+              </Button>
+            </Grid>
           ))}
-        </List>
+        </Grid>
+
+        {selectedOption && (
+          <Box mt={2}>
+            <Typography variant="subtitle1" color="text.secondary">
+              Your balance: {userBalance} ETH
+            </Typography>
+            <TextField
+              label="Bet Amount (ETH)"
+              value={betAmount}
+              onChange={(e) => setBetAmount(e.target.value)}
+              fullWidth
+              margin="normal"
+            />
+            <Button
+              variant="contained"
+              color="success"
+              fullWidth
+              onClick={handlePlaceBet}
+            >
+              Place Bet on "{options[selectedOption]}"
+            </Button>
+          </Box>
+        )}
       </CardContent>
     </Card>
   );

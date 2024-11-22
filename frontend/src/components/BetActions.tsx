@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { createBet, getBetDetails, getBetsAddresses, getBetsCount } from "../utils/contractServices";
+import { createBet, getBetDetails, getBetsAddresses, getBetsCount, placeBet } from "../utils/contractServices";
 import { Box, Button, TextField, Typography } from "@mui/material";
 import BetCard from "./BetCard";
 
 type BetDetails = {
   name: string;
   options: string[];
+  address: string;
 };
 
-const BetActions = () => {
+const BetActions = ({ account, balance, updateBalance }: { account: string; balance: string; updateBalance: () => void }) => {
   const [title, setTitle] = useState("");
   const [options, setOptions] = useState<string[]>([]);
   const [optionInput, setOptionInput] = useState("");
@@ -58,12 +59,28 @@ const BetActions = () => {
     setOptionInput("");
     fetchBetsCount();  // Refresh bet count
     fetchBets();       // Refresh bets list
+    updateBalance();
   };
 
   const handleAddOption = () => {
     if (optionInput.trim()) {
       setOptions([...options, optionInput.trim()]);
       setOptionInput("");
+    }
+  };
+
+  const handlePlaceBet = async (address: string, option: number, amount: string) => {
+    if (!amount || parseFloat(amount) <= 0) {
+      alert("Please enter a valid bet amount.");
+      return;
+    }
+  
+    const success = await placeBet(address, option, amount);
+    if (success) {
+      alert(`Bet placed successfully on option ${option}!`);
+      updateBalance(); // Refresh user's balance
+    } else {
+      alert("Failed to place bet. Please try again.");
     }
   };
 
@@ -113,7 +130,7 @@ const BetActions = () => {
           Existing Bets:
         </Typography>
         {bets.map((bet, index) => (
-          <BetCard key={index} name={bet.name} options={bet.options} />
+          <BetCard key={index} name={bet.name} options={bet.options} address={bet.address} userBalance={balance} onPlaceBet={handlePlaceBet} />
         ))}
       </Box>
     </Box>
