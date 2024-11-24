@@ -7,6 +7,7 @@ import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
 import AllBets from "./components/AllBets";
 import MyBets from "./components/MyBets";
 import "./index.css";
+import { AppBar, Tab, Tabs, Toolbar, Typography } from "@mui/material";
 
 function App() {
   const [account, setAccount] = useState<string | null>(null);
@@ -54,23 +55,28 @@ function App() {
 
   return (
     <BrowserRouter>
-      <div className="app">
+      <div className="min-h-screen bg-gray-100">
         <ToastContainer />
         {!account ? (
           <ConnectWalletPage setAccount={setAccount} />
         ) : (
           <>
-            <nav style={{ display: "flex", justifyContent: "space-around", padding: "10px", background: "#f4f4f4" }}>
-              <Link to="/">Dashboard</Link>
-              <Link to="/all-bets">All Bets</Link>
-              <Link to="/my-bets">My Bets</Link>
-              <Link to="/created-bets">Created Bets</Link>
-            </nav>
+            <AppBar position="static" className="bg-blue-600">
+              <Toolbar>
+                <Typography variant="h6" className="flex-grow">
+                  Betting DApp
+                </Typography>
+                <Tabs value={false} textColor="inherit" indicatorColor="secondary">
+                  <Tab label="Dashboard" to="/" component={Link} />
+                  <Tab label="All Bets" to="/all-bets" component={Link} />
+                  <Tab label="My Bets" to="/my-bets" component={Link} />
+                </Tabs>
+              </Toolbar>
+            </AppBar>
             <Routes>
               <Route path="/" element={<Dashboard account={account} balance={balance} updateBalance={updateBalance} />} />
               <Route path="/all-bets" element={<AllBets account={account} balance={balance} updateBalance={updateBalance} />} />
               <Route path="/my-bets" element={<MyBets account={account} />} />
-              {/* <Route path="/created-bets" element={<CreatedBets account={account} />} /> */}
             </Routes>
           </>
         )}

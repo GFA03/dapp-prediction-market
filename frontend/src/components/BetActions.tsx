@@ -44,44 +44,38 @@ const BetActions = ({ account, balance, updateBalance }: { account: string; bala
   
 
     return (
-    <Box sx={{ padding: 3 }}>
-      <Typography variant="h4" gutterBottom>
+      <Box>
+      <Typography variant="h5" gutterBottom>
         Create a Bet
       </Typography>
-      <Box sx={{ marginBottom: 3 }}>
-        <TextField
-          label="Bet Title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          label="Bet Option"
-          value={optionInput}
-          onChange={(e) => setOptionInput(e.target.value)}
-          fullWidth
-          margin="normal"
-        />
-        <Button variant="contained" color="primary" onClick={handleAddOption}>
-          Add Option
-        </Button>
-        <Typography variant="h6" sx={{ marginTop: 2 }}>
-          Options:
-        </Typography>
-        <Box>
-          {options.map((option, index) => (
-            <Typography key={index} variant="body1">
-              - {option}
-            </Typography>
-          ))}
-        </Box>
+      <TextField
+        label="Bet Title"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        fullWidth
+        margin="normal"
+      />
+      <TextField
+        label="Option"
+        value={optionInput}
+        onChange={(e) => setOptionInput(e.target.value)}
+        fullWidth
+        margin="normal"
+      />
+      <Button variant="outlined" color="primary" onClick={handleAddOption} className="mt-2">
+        Add Option
+      </Button>
+      <Box mt={2}>
+        {options.map((option, idx) => (
+          <Typography key={idx} variant="body1">
+            - {option}
+          </Typography>
+        ))}
       </Box>
-      <Button variant="contained" color="success" onClick={handleCreateBet}>
+      <Button variant="contained" color="success" onClick={handleCreateBet} sx={{ marginTop: 2 }}>
         Create Bet
       </Button>
-
-      <Typography variant="h5" sx={{ marginTop: 4 }}>
+      <Typography variant="h6" mt={3}>
         Total Bets: {betCount}
       </Typography>
     </Box>
