@@ -6,6 +6,7 @@ import Dashboard from "./components/Dashboard";
 import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
 import AllBets from "./components/AllBets";
 import MyBets from "./components/MyBets";
+import "./index.css";
 
 function App() {
   const [account, setAccount] = useState<string | null>(null);
