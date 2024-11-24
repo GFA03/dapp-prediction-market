@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { requestAccount } from "./utils/contractServices";
+import { getBalance, requestAccount } from "./utils/contractServices";
 import { ToastContainer } from "react-toastify";
 import ConnectWalletPage from "./components/ConnectWalletPage";
 import Dashboard from "./components/Dashboard";
@@ -8,6 +8,7 @@ import AllBets from "./components/AllBets";
 
 function App() {
   const [account, setAccount] = useState<string | null>(null);
+  const [balance, setBalance] = useState<string>("0");
 
   useEffect(() => {
     const fetchCurAccount = async () => {
@@ -29,6 +30,26 @@ function App() {
     };
   });
 
+
+  useEffect(() => {
+    const fetchBalance = async () => {
+      if (!account) {
+        return
+      }
+      const balance = await getBalance(account);
+      setBalance(balance || "0");
+    };
+    fetchBalance();
+  }, [account]);
+
+  const updateBalance = async () => {
+    if (!account) {
+      return
+    }
+    const balance = await getBalance(account);
+    setBalance(balance || "0");
+  };
+
   return (
     <BrowserRouter>
       <div className="app">
@@ -44,8 +65,8 @@ function App() {
               <Link to="/created-bets">Created Bets</Link>
             </nav>
             <Routes>
-              <Route path="/" element={<Dashboard account={account} />} />
-              <Route path="/all-bets" element={<AllBets account={account} />} />
+              <Route path="/" element={<Dashboard account={account} balance={balance} updateBalance={updateBalance} />} />
+              <Route path="/all-bets" element={<AllBets account={account} balance={balance} updateBalance={updateBalance} />} />
               {/* <Route path="/my-bets" element={<MyBets account={account} />} />
               <Route path="/created-bets" element={<CreatedBets account={account} />} /> */}
             </Routes>

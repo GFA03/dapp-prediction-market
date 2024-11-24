@@ -66,20 +66,7 @@ const BetActions = ({ account, balance, updateBalance }: { account: string; bala
     }
   };
 
-  const handlePlaceBet = async (address: string, option: number, amount: string) => {
-    if (!amount || parseFloat(amount) <= 0) {
-      alert("Please enter a valid bet amount.");
-      return;
-    }
   
-    const success = await placeBet(address, option, amount);
-    if (success) {
-      alert(`Bet placed successfully on option ${option}!`);
-      updateBalance(); // Refresh user's balance
-    } else {
-      alert("Failed to place bet. Please try again.");
-    }
-  };
 
     return (
     <Box sx={{ padding: 3 }}>
@@ -122,14 +109,6 @@ const BetActions = ({ account, balance, updateBalance }: { account: string; bala
       <Typography variant="h5" sx={{ marginTop: 4 }}>
         Total Bets: {betCount}
       </Typography>
-      <Box>
-        <Typography variant="h5" gutterBottom>
-          Existing Bets:
-        </Typography>
-        {bets.map((bet, index) => (
-          <BetCard key={index} name={bet.name} options={bet.options} address={bet.address} userBalance={balance} onPlaceBet={handlePlaceBet} />
-        ))}
-      </Box>
     </Box>
   );
 };
