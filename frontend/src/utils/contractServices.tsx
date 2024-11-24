@@ -195,7 +195,7 @@ export const placeBet = async (
   }
 };
 
-export async function fetchAllBets(userAddress: string) {
+export const fetchAllBets = async (userAddress: string) => {
   if (!provider) {
     await initialize();
   }
@@ -219,6 +219,41 @@ export async function fetchAllBets(userAddress: string) {
           name: betName,
           options: betOptions,
           betData,
+        });
+      }
+    }
+
+    // Increment offset for pagination
+    offset += limit;
+  }
+
+  return bets;
+}
+
+export const fetchCreatedBets = async (userAddress: string) => {
+  if (!provider) {
+    await initialize();
+  }
+  const bets = [];
+  let offset = 0;
+  const limit = 20;
+
+  while (true) {
+    if (Number(await betFactoryContract!.betsCount()) - offset <= 0) break;
+    const deployedBets = await betFactoryContract!.getBets(limit, offset);
+
+    for (const betAddress of deployedBets) {
+      const betContract = new Contract(betAddress, Bet.abi, provider);
+      const owner = await betContract.owner();
+      console.log("OWNER and USER");
+      console.log(owner, userAddress);
+      if (owner.toLowerCase() === userAddress.toLowerCase()) {
+        const betName = await betContract.getName();
+        const betOptions = await betContract.getOptions();
+        bets.push({
+          address: betAddress,
+          name: betName,
+          options: betOptions,
         });
       }
     }
