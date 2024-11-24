@@ -2,18 +2,15 @@ import React, { useState, useEffect } from "react";
 import { createBet, getBetDetails, getBetsAddresses, getBetsCount, placeBet } from "../utils/contractServices";
 import { Box, Button, TextField, Typography } from "@mui/material";
 import BetCard from "./BetCard";
+import Bet from "../models/Bet";
 
-type BetDetails = {
-  name: string;
-  options: string[];
-  address: string;
-};
+
 
 const BetActions = ({ account, balance, updateBalance }: { account: string; balance: string; updateBalance: () => void }) => {
   const [title, setTitle] = useState("");
   const [options, setOptions] = useState<string[]>([]);
   const [optionInput, setOptionInput] = useState("");
-  const [bets, setBets] = useState<BetDetails[]>([]);
+  const [bets, setBets] = useState<Bet[]>([]);
   const [betCount, setBetCount] = useState<number>(0);
 
   useEffect(() => {

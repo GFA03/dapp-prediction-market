@@ -3,46 +3,56 @@ import { requestAccount } from "./utils/contractServices";
 import { ToastContainer } from "react-toastify";
 import ConnectWalletPage from "./components/ConnectWalletPage";
 import Dashboard from "./components/Dashboard";
+import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
+import AllBets from "./components/AllBets";
 
 function App() {
   const [account, setAccount] = useState<string | null>(null);
 
   useEffect(() => {
-    console.log('EFFECT 1');
     const fetchCurAccount = async () => {
       const account = await requestAccount();
-      console.log(`account in fetchCurAccount: ${account}`);
       setAccount(account);
     };
     fetchCurAccount();
-    console.log('EFFECT 1 DONE 🟢');
   }, []);
 
   useEffect(() => {
-    console.log('EFFECT 2');
     const handleAccountChanged = (newAccounts: any) =>
       setAccount(newAccounts.length > 0 ? newAccounts[0] : null);
 
     if (window.ethereum) {
       window.ethereum.on("accountsChanged", handleAccountChanged);
     }
-    console.log('EFFECT 2 DONE 🟢');
     return () => {
       window.ethereum?.removeListener("accountsChanged", handleAccountChanged);
     };
   });
 
   return (
-    <div className="app">
-      <ToastContainer />
-      {!account ? (
-        <ConnectWalletPage setAccount={setAccount} />
-      ) : (
-        <div>
-          <Dashboard account={account} />
-        </div>
-      )}
-    </div>
+    <BrowserRouter>
+      <div className="app">
+        <ToastContainer />
+        {!account ? (
+          <ConnectWalletPage setAccount={setAccount} />
+        ) : (
+          <>
+            <nav style={{ display: "flex", justifyContent: "space-around", padding: "10px", background: "#f4f4f4" }}>
+              <Link to="/">Dashboard</Link>
+              <Link to="/all-bets">All Bets</Link>
+              <Link to="/my-bets">My Bets</Link>
+              <Link to="/created-bets">Created Bets</Link>
+            </nav>
+            <Routes>
+              <Route path="/" element={<Dashboard account={account} />} />
+              <Route path="/all-bets" element={<AllBets account={account} />} />
+              {/* <Route path="/my-bets" element={<MyBets account={account} />} />
+              <Route path="/created-bets" element={<CreatedBets account={account} />} /> */}
+            </Routes>
+          </>
+        )}
+      </div>
+    </BrowserRouter>
   );
 }
 
