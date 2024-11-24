@@ -1,6 +1,6 @@
 import Bet_Factory from "../artifacts/contracts/Bet_Factory.sol/Bet_Factory.json";
 import Bet from "../artifacts/contracts/Bet.sol/Bet.json";
-import { BrowserProvider, Contract, formatEther, JsonRpcSigner } from "ethers";
+import { BrowserProvider, Contract, formatEther, JsonRpcSigner, parseEther } from "ethers";
 import { CONTRACT_ADDRESS } from "./constants";
 import { MetaMaskInpageProvider } from "@metamask/providers";
 
@@ -174,7 +174,8 @@ export const placeBet = async (address: string, option: number, amount: string) 
   }
 
   try {
-    const tx = await betContract.bet(option, { value: amount });
+    const ethValue = parseEther(amount);
+    const tx = await betContract.bet(option, { value: ethValue });
     await tx.wait();
     console.log(`Bet placed successfully 🟢 Option: ${option}, Amount: ${amount}`);
     return true;
