@@ -1,14 +1,20 @@
 import Bet_Factory from "../artifacts/contracts/Bet_Factory.sol/Bet_Factory.json";
 import Bet from "../artifacts/contracts/Bet.sol/Bet.json";
-import { BrowserProvider, Contract, formatEther, JsonRpcSigner, parseEther } from "ethers";
+import {
+  BrowserProvider,
+  Contract,
+  formatEther,
+  JsonRpcSigner,
+  parseEther,
+} from "ethers";
 import { CONTRACT_ADDRESS } from "./constants";
 import { MetaMaskInpageProvider } from "@metamask/providers";
 
 declare global {
-    interface Window{
-      ethereum?:MetaMaskInpageProvider
-    }
+  interface Window {
+    ethereum?: MetaMaskInpageProvider;
   }
+}
 
 let provider: BrowserProvider | null = null;
 let signer: JsonRpcSigner | null = null;
@@ -18,10 +24,14 @@ const initialize = async () => {
   if (window.ethereum !== null) {
     provider = new BrowserProvider(window.ethereum as MetaMaskInpageProvider);
     signer = await provider.getSigner();
-    betFactoryContract = new Contract(CONTRACT_ADDRESS, Bet_Factory.abi, signer);
-    console.log('INITIALIZATION DONE 🟢');
+    betFactoryContract = new Contract(
+      CONTRACT_ADDRESS,
+      Bet_Factory.abi,
+      signer
+    );
+    console.log("INITIALIZATION DONE 🟢");
   } else {
-    console.log('INITIALIZATION ERROR ⭕');
+    console.log("INITIALIZATION ERROR ⭕");
     console.error("Please install MetaMask!");
   }
 };
@@ -33,13 +43,13 @@ const initializeBetContract = async (address: string) => {
 
   try {
     const betContract = new Contract(address, Bet.abi, signer);
-    
+
     return betContract;
   } catch (error: any) {
     console.error("Error initializing bet contract:", error.message);
     return null;
   }
-}
+};
 
 // Function to request single account
 export const requestAccount = async () => {
@@ -49,12 +59,12 @@ export const requestAccount = async () => {
 
   try {
     const accounts = await provider!.send("eth_requestAccounts", []);
-    console.log('REQUEST ACCOUNT DONE 🟢');
+    console.log("REQUEST ACCOUNT DONE 🟢");
     return accounts[0]; // Return the first account
     // return null;
   } catch (error: any) {
     console.error("Error requesting account:", error.message);
-    console.log('REQUEST ACCOUNT ERROR ⭕');
+    console.log("REQUEST ACCOUNT ERROR ⭕");
     return null;
   }
 };
@@ -89,7 +99,7 @@ export const createBet = async (title: string, options: string[]) => {
     console.log("Bet creation error ⭕");
     console.error("Error creating bet:", error.message);
   }
-}
+};
 
 export const getBetsAddresses = async (limit: number, offset: number) => {
   if (!betFactoryContract) {
@@ -103,7 +113,7 @@ export const getBetsAddresses = async (limit: number, offset: number) => {
     console.error("Error getting bets:", error.message);
     return [];
   }
-}
+};
 
 export const getBetsCount = async () => {
   if (!betFactoryContract) {
@@ -119,7 +129,7 @@ export const getBetsCount = async () => {
     console.error("Error getting bets length:", error.message);
     return 0;
   }
-}
+};
 
 export const getBetDetails = async (address: string) => {
   const betContract = await initializeBetContract(address);
@@ -132,12 +142,12 @@ export const getBetDetails = async (address: string) => {
   try {
     const name = await getBetName(betContract);
     const options = await getBetOptions(betContract);
-    return {name, options, address};
+    return { name, options, address };
   } catch (error: any) {
     console.error("Error getting bet name:", error.message);
     return "";
   }
-}
+};
 
 const getBetName = async (betContract: Contract) => {
   try {
@@ -147,7 +157,7 @@ const getBetName = async (betContract: Contract) => {
     console.error("Error getting bet name:", error.message);
     return "";
   }
-}
+};
 
 const getBetOptions = async (betContract: Contract) => {
   try {
@@ -157,9 +167,13 @@ const getBetOptions = async (betContract: Contract) => {
     console.error("Error getting bet options:", error.message);
     return [];
   }
-}
+};
 
-export const placeBet = async (address: string, option: number, amount: string) => {
+export const placeBet = async (
+  address: string,
+  option: number,
+  amount: string
+) => {
   const betContract = await initializeBetContract(address);
 
   if (!betContract) {
@@ -171,7 +185,9 @@ export const placeBet = async (address: string, option: number, amount: string) 
     const ethValue = parseEther(amount);
     const tx = await betContract.bet(option, { value: ethValue });
     await tx.wait();
-    console.log(`Bet placed successfully 🟢 Option: ${option}, Amount: ${amount}`);
+    console.log(
+      `Bet placed successfully 🟢 Option: ${option}, Amount: ${amount}`
+    );
     return true;
   } catch (error: any) {
     console.error("Error placing bet:", error.message);
@@ -181,35 +197,35 @@ export const placeBet = async (address: string, option: number, amount: string) 
 
 export async function fetchAllBets(userAddress: string) {
   if (!provider) {
-      await initialize();
+    await initialize();
   }
   const bets = [];
   let offset = 0;
   const limit = 20;
 
-  // while (true) {
-      const deployedBets = await betFactoryContract!.getBets(limit, offset);
-      // if (deployedBets.length === 0) break;
+  while (true) {
+    if (Number(await betFactoryContract!.betsCount()) - offset <= 0) break;
+    const deployedBets = await betFactoryContract!.getBets(limit, offset);
 
-      for (const betAddress of deployedBets) {
-          const betContract = new Contract(betAddress, Bet.abi, provider);
-          const betData = await betContract.getBet({ from: userAddress });
-          if (betData !== null && Number(betData[1]) > 0) {
-              // User has placed a bet here
-              const betName = await betContract.getName();
-              const betOptions = await betContract.getOptions();
-              bets.push({
-                  address: betAddress,
-                  name: betName,
-                  options: betOptions,
-                  betData,
-              });
-          }
+    for (const betAddress of deployedBets) {
+      const betContract = new Contract(betAddress, Bet.abi, provider);
+      const betData = await betContract.getBet({ from: userAddress });
+      if (betData !== null && Number(betData[1]) > 0) {
+        // User has placed a bet here
+        const betName = await betContract.getName();
+        const betOptions = await betContract.getOptions();
+        bets.push({
+          address: betAddress,
+          name: betName,
+          options: betOptions,
+          betData,
+        });
       }
+    }
 
-      // Increment offset for pagination
-      offset += limit;
-  // }
+    // Increment offset for pagination
+    offset += limit;
+  }
 
   return bets;
 }
