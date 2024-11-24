@@ -33,7 +33,7 @@ const initializeBetContract = async (address: string) => {
 
   try {
     const betContract = new Contract(address, Bet.abi, signer);
-    console.log("Bet contract initialized 🟢");
+    
     return betContract;
   } catch (error: any) {
     console.error("Error initializing bet contract:", error.message);
@@ -98,8 +98,6 @@ export const getBetsAddresses = async (limit: number, offset: number) => {
 
   try {
     const bets = await betFactoryContract!.getBets(limit, offset);
-    console.log("Bets DONE 🟢:");
-    console.log(bets);
     return bets;
   } catch (error: any) {
     console.error("Error getting bets:", error.message);
@@ -114,7 +112,6 @@ export const getBetsCount = async () => {
 
   try {
     const length = await betFactoryContract!.betsCount();
-    console.log("Bets length DONE 🟢");
     // transform length from bigint to number
     const count = Number(length);
     return count;
@@ -133,11 +130,8 @@ export const getBetDetails = async (address: string) => {
   }
 
   try {
-    console.log("Getting bet name and options for address:", address);
     const name = await getBetName(betContract);
     const options = await getBetOptions(betContract);
-    console.log("Bet details DONE 🟢");
-    console.log(name, options);
     return {name, options, address};
   } catch (error: any) {
     console.error("Error getting bet name:", error.message);
@@ -184,3 +178,38 @@ export const placeBet = async (address: string, option: number, amount: string) 
     return false;
   }
 };
+
+export async function fetchAllBets(userAddress: string) {
+  if (!provider) {
+      await initialize();
+  }
+  const bets = [];
+  let offset = 0;
+  const limit = 20;
+
+  // while (true) {
+      const deployedBets = await betFactoryContract!.getBets(limit, offset);
+      // if (deployedBets.length === 0) break;
+
+      for (const betAddress of deployedBets) {
+          const betContract = new Contract(betAddress, Bet.abi, provider);
+          const betData = await betContract.getBet({ from: userAddress });
+          if (betData !== null && Number(betData[1]) > 0) {
+              // User has placed a bet here
+              const betName = await betContract.getName();
+              const betOptions = await betContract.getOptions();
+              bets.push({
+                  address: betAddress,
+                  name: betName,
+                  options: betOptions,
+                  betData,
+              });
+          }
+      }
+
+      // Increment offset for pagination
+      offset += limit;
+  // }
+
+  return bets;
+}

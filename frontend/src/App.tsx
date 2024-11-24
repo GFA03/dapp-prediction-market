@@ -5,6 +5,7 @@ import ConnectWalletPage from "./components/ConnectWalletPage";
 import Dashboard from "./components/Dashboard";
 import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
 import AllBets from "./components/AllBets";
+import MyBets from "./components/MyBets";
 
 function App() {
   const [account, setAccount] = useState<string | null>(null);
@@ -67,8 +68,8 @@ function App() {
             <Routes>
               <Route path="/" element={<Dashboard account={account} balance={balance} updateBalance={updateBalance} />} />
               <Route path="/all-bets" element={<AllBets account={account} balance={balance} updateBalance={updateBalance} />} />
-              {/* <Route path="/my-bets" element={<MyBets account={account} />} />
-              <Route path="/created-bets" element={<CreatedBets account={account} />} /> */}
+              <Route path="/my-bets" element={<MyBets account={account} />} />
+              {/* <Route path="/created-bets" element={<CreatedBets account={account} />} /> */}
             </Routes>
           </>
         )}
