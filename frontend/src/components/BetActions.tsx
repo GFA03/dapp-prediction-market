@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { createBet, getBetDetails, getBetsAddresses, getBetsCount, placeBet } from "../utils/contractServices";
+import { createBet, getBetsCount } from "../utils/contractServices";
 import { Box, Button, TextField, Typography } from "@mui/material";
-import BetCard from "./BetCard";
-import Bet from "../models/Bet";
 
 
 
@@ -10,12 +8,10 @@ const BetActions = ({ account, balance, updateBalance }: { account: string; bala
   const [title, setTitle] = useState("");
   const [options, setOptions] = useState<string[]>([]);
   const [optionInput, setOptionInput] = useState("");
-  const [bets, setBets] = useState<Bet[]>([]);
   const [betCount, setBetCount] = useState<number>(0);
 
   useEffect(() => {
     fetchBetsCount();
-    fetchBets();
   }, []);
 
   const fetchBetsCount = async () => {
@@ -23,26 +19,6 @@ const BetActions = ({ account, balance, updateBalance }: { account: string; bala
     setBetCount(count);
   };
 
-  const fetchBets = async () => {
-    const fetchedBets = await getBetsAddresses(10, 0); // Fetch first 10 bets
-    if (!fetchedBets) {
-      return;
-    }
-
-    try {
-      // Wait for all bet details to resolve
-      const betsDetails = await Promise.all(
-        fetchedBets.map(async (bet: string) => {
-          const betDetails = await getBetDetails(bet);
-          return betDetails;
-        })
-      );
-
-      setBets(betsDetails);
-    } catch (error: any) {
-      console.error("Error fetching bet details:", error.message);
-    }
-  };
 
   const handleCreateBet = async () => {
     if (!title || options.length < 2 || options.length > 8) {
@@ -55,7 +31,6 @@ const BetActions = ({ account, balance, updateBalance }: { account: string; bala
     setOptions([]);
     setOptionInput("");
     fetchBetsCount();  // Refresh bet count
-    fetchBets();       // Refresh bets list
     updateBalance();
   };
 
