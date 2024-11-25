@@ -6,7 +6,7 @@ import {
   placeBet,
 } from "../utils/contractServices";
 import BetCard from "./BetCard";
-import Bet from "../models/Bet";
+import { Bet } from "../models/Bet";
 import {
   Container,
   Typography,

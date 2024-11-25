@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { fetchAllBets } from "../utils/contractServices";
+import { fetchUserBets } from "../utils/contractServices";
 import MyBetCard from "./MyBetCard";
 
 const MyBets = ({ account }: { account: string }) => {
-  const [myBets, setMyBets] = useState<{ address: string; name: string; options: string[]; betData: number[] }[]>([]);
+  const [myBets, setMyBets] = useState<{ address: string; name: string; options: string[]; status: number; betData: number[] }[]>([]);
 
   useEffect(() => {
     const loadUserBets = async () => {
       try {
-        const bets = await fetchAllBets(account);
+        const bets = await fetchUserBets(account);
         setMyBets(bets);
       } catch (error) {
         console.error("Error fetching user bets:", error);
@@ -37,6 +37,7 @@ const MyBets = ({ account }: { account: string }) => {
               key={index}
               name={bet.name}
               options={bet.options}
+              status={bet.status}
               chosenOption={bet.options[Number(bet.betData[0])]}
               amount={Number(bet.betData[1])}
               onCashback={() => handleCashback(bet.address)}

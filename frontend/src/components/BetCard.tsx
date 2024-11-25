@@ -1,15 +1,24 @@
 import React, { useState } from "react";
 import { Card, CardContent, Typography, Button, Grid, TextField, Box } from "@mui/material";
+import { StatusColors, StatusLabels } from "../models/Bet";
 
 type BetCardProps = {
   name: string;
   options: string[];
+  status: number;
   address: string;
   userBalance: string;
   onPlaceBet: (address: string, option: number, amount: string) => void;
 };
 
-const BetCard: React.FC<BetCardProps> = ({ name, options, address, userBalance, onPlaceBet }) => {
+const BetCard: React.FC<BetCardProps> = ({
+  name,
+  options,
+  status,
+  address,
+  userBalance,
+  onPlaceBet,
+}) => {
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [betAmount, setBetAmount] = useState<string>("");
 
@@ -41,7 +50,15 @@ const BetCard: React.FC<BetCardProps> = ({ name, options, address, userBalance, 
         <Typography variant="h6" component="div" gutterBottom>
           {name}
         </Typography>
-        <Grid container spacing={2}>
+
+        <Typography
+          variant="body2"
+          className={`font-bold ${StatusColors[status as keyof typeof StatusColors]}`}
+        >
+          Status: {StatusLabels[status as keyof typeof StatusLabels]}
+        </Typography>
+
+        <Grid container spacing={2} style={{ marginTop: "1rem" }}>
           {options.map((option, index) => (
             <Grid item xs={6} key={index}>
               <Button

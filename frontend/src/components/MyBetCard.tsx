@@ -1,20 +1,28 @@
 import React from "react";
 import { Button, Card, CardContent, Typography } from "@mui/material";
+import { StatusColors, StatusLabels } from "../models/Bet";
 
 type MyBetCardProps = {
   name: string;
   options: string[];
+  status: number;
   chosenOption: string;
   amount: number;
   onCashback: () => void;
 };
 
-const MyBetCard: React.FC<MyBetCardProps> = ({ name, options, chosenOption, amount, onCashback }) => {
+const MyBetCard: React.FC<MyBetCardProps> = ({ name, options, status, chosenOption, amount, onCashback }) => {
   return (
     <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-lg p-4">
       <CardContent>
         <Typography variant="h6" className="font-bold text-gray-800 mb-2">
           {name}
+        </Typography>
+        <Typography
+          variant="body2"
+          className={`font-bold ${StatusColors[status as keyof typeof StatusColors]}`}
+        >
+          Status: {StatusLabels[status as keyof typeof StatusLabels]}
         </Typography>
         <Typography className="text-sm text-gray-600 mb-4">
           <span className="font-medium">Options:</span> {options.join(", ")}

@@ -11,15 +11,20 @@ import {
   Button,
   TextField,
 } from "@mui/material";
+import { StatusColors, StatusLabels } from "../models/Bet";
+
+
 
 const CreatedBetCard = ({
   address,
   name,
   options,
+  status,
 }: {
   address: string;
   name: string;
   options: string[];
+  status: number;
 }) => {
   const [winnerOption, setWinnerOption] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -53,6 +58,12 @@ const CreatedBetCard = ({
     <Card sx={{ margin: "1rem" }}>
       <CardContent>
         <Typography variant="h5">{name}</Typography>
+        <Typography
+          variant="body2"
+          className={`font-bold ${StatusColors[status as keyof typeof StatusColors]}`}
+        >
+          Status: {StatusLabels[status as keyof typeof StatusLabels]}
+        </Typography>
         <Typography variant="body2" color="text.secondary">
           Options: {options.join(", ")}
         </Typography>
