@@ -9,6 +9,7 @@ import {
 } from "ethers";
 import { CONTRACT_ADDRESS } from "./constants";
 import { MetaMaskInpageProvider } from "@metamask/providers";
+import { UserBet } from "../models/Bet";
 
 declare global {
   interface Window {
@@ -140,7 +141,7 @@ const fetchBets = async (
   filterFn: (contract: Contract) => Promise<boolean>
 ) => {
   await ensureInitialized();
-  const bets = [];
+  const bets: UserBet[] = [];
   let offset = 0;
   const limit = 20;
 
@@ -156,7 +157,13 @@ const fetchBets = async (
         const options = await betContract.getOptions();
         const status = Number(await betContract.getStatus());
         const betData = await betContract.getBet({ from: userAddress });
-        bets.push({ address: betAddress, name, options, status, betData });
+        bets.push({
+          address: betAddress,
+          name,
+          options,
+          status,
+          betData,
+        });
       }
     }
     offset += limit;
@@ -194,6 +201,13 @@ export const fetchUserBets = async (userAddress: string) =>
     const betData = await betContract.getBet({ from: userAddress });
     const status = Number(await betContract.getStatus());
     return betData && Number(betData[1]) > 0 && (status === BetStatus.Open || status === BetStatus.Closed);
+  });
+
+export const fetchUserHistoryBets = async (userAddress: string) =>
+  fetchBets(userAddress, async (betContract) => {
+    const betData = await betContract.getBet({ from: userAddress });
+    const status = Number(await betContract.getStatus());
+    return betData && Number(betData[1]) > 0 && (status === BetStatus.Canceled || status === BetStatus.Finished);
   });
 
 export const fetchCreatedBets = async (userAddress: string) =>

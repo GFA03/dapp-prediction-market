@@ -1,9 +1,17 @@
 export type Bet = {
-    name: string;
-    options: string[];
-    status: number;
-    address: string;
-  };
+  name: string;
+  options: string[];
+  status: number;
+  address: string;
+};
+
+export type UserBet = {
+  address: string;
+  name: string;
+  options: string[];
+  status: number;
+  betData: number[]; // [chosenOption, amount]
+};
 
 export const StatusColors = {
   0: "text-green-500", // Open
@@ -18,6 +26,3 @@ export const StatusLabels = {
   2: "Canceled",
   3: "Finished",
 };
-
-
-
