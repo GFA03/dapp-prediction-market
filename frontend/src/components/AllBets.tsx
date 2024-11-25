@@ -16,6 +16,7 @@ import {
   Tab,
   Box,
 } from "@mui/material";
+import CreatedBetCard from "./CreatedBetCard";
 
 const AllBets = ({
   account,
@@ -31,29 +32,28 @@ const AllBets = ({
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedTab, setSelectedTab] = useState<number>(0);
 
-  const fetchBets = async () => {
-    setLoading(true);
-    try {
-      if (selectedTab === 0) {
-        const addresses = await getBetsAddresses(10, 0);
-        const details = await Promise.all(
-          addresses.map(async (addr: string) => await getBetDetails(addr))
-        );
-        setBets(details);
-      } else if (selectedTab === 1) {
-        const details = await fetchCreatedBets(account);
-        setCreatedBets(details);
-      }
-    } catch (error) {
-      console.error("Failed to fetch bets:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchBets = async () => {
+      setLoading(true);
+      try {
+        if (selectedTab === 0) {
+          const addresses = await getBetsAddresses(10, 0);
+          const details = await Promise.all(
+            addresses.map(async (addr: string) => await getBetDetails(addr))
+          );
+          setBets(details);
+        } else if (selectedTab === 1) {
+          const details = await fetchCreatedBets(account);
+          setCreatedBets(details);
+        }
+      } catch (error) {
+        console.error("Failed to fetch bets:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchBets();
-  }, [selectedTab]);
+  }, [selectedTab, account]);
 
   const handlePlaceBet = async (
     address: string,
@@ -110,6 +110,34 @@ const AllBets = ({
     );
   };
 
+  const renderCreatedBets = (betsToRender: Bet[]) => {
+    if (loading) {
+      return (
+        <div className="flex justify-center items-center h-64">
+          <CircularProgress />
+        </div>
+      );
+    }
+  
+    if (betsToRender.length === 0) {
+      return (
+        <Typography variant="h6" className="text-center text-gray-500">
+          No created bets available at the moment.
+        </Typography>
+      );
+    }
+  
+    return (
+      <Grid container spacing={4}>
+        {betsToRender.map((bet, idx) => (
+          <Grid item xs={12} sm={6} md={4} key={idx}>
+            <CreatedBetCard {...bet} />
+          </Grid>
+        ))}
+      </Grid>
+    );
+  };
+
   return (
     <Container maxWidth="lg" className="py-8">
       <Typography
@@ -129,7 +157,7 @@ const AllBets = ({
           <Tab label="My Bets" />
         </Tabs>
       </Box>
-      {selectedTab === 0 ? renderBets(bets) : renderBets(createdBets)}
+      {selectedTab === 0 ? renderBets(bets) : renderCreatedBets(createdBets)}
     </Container>
   );
 };

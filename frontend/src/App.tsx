@@ -33,11 +33,10 @@ function App() {
     };
   });
 
-
   useEffect(() => {
     const fetchBalance = async () => {
       if (!account) {
-        return
+        return;
       }
       const balance = await getBalance(account);
       setBalance(balance || "0");
@@ -47,7 +46,7 @@ function App() {
 
   const updateBalance = async () => {
     if (!account) {
-      return
+      return;
     }
     const balance = await getBalance(account);
     setBalance(balance || "0");
@@ -66,7 +65,11 @@ function App() {
                 <Typography variant="h6" className="flex-grow">
                   Betting DApp
                 </Typography>
-                <Tabs value={false} textColor="inherit" indicatorColor="secondary">
+                <Tabs
+                  value={false}
+                  textColor="inherit"
+                  indicatorColor="secondary"
+                >
                   <Tab label="Dashboard" to="/" component={Link} />
                   <Tab label="All Bets" to="/all-bets" component={Link} />
                   <Tab label="My Bets" to="/my-bets" component={Link} />
@@ -74,8 +77,26 @@ function App() {
               </Toolbar>
             </AppBar>
             <Routes>
-              <Route path="/" element={<Dashboard account={account} balance={balance} updateBalance={updateBalance} />} />
-              <Route path="/all-bets" element={<AllBets account={account} balance={balance} updateBalance={updateBalance} />} />
+              <Route
+                path="/"
+                element={
+                  <Dashboard
+                    account={account}
+                    balance={balance}
+                    updateBalance={updateBalance}
+                  />
+                }
+              />
+              <Route
+                path="/all-bets"
+                element={
+                  <AllBets
+                    account={account}
+                    balance={balance}
+                    updateBalance={updateBalance}
+                  />
+                }
+              />
               <Route path="/my-bets" element={<MyBets account={account} />} />
             </Routes>
           </>

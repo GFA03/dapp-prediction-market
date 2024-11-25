@@ -245,8 +245,6 @@ export const fetchCreatedBets = async (userAddress: string) => {
     for (const betAddress of deployedBets) {
       const betContract = new Contract(betAddress, Bet.abi, provider);
       const owner = await betContract.owner();
-      console.log("OWNER and USER");
-      console.log(owner, userAddress);
       if (owner.toLowerCase() === userAddress.toLowerCase()) {
         const betName = await betContract.getName();
         const betOptions = await betContract.getOptions();
@@ -264,3 +262,51 @@ export const fetchCreatedBets = async (userAddress: string) => {
 
   return bets;
 }
+
+export const closeBet = async (betAddress: string) => {
+  if (!provider) {
+    await initialize();
+  }
+  
+  const contract = new Contract(betAddress, Bet.abi, signer);
+  try {
+    const tx = await contract.close();
+    await tx.wait();
+    return true;
+  } catch (error) {
+    console.error("Failed to close the bet:", error);
+    return false;
+  }
+};
+
+export const cancelBet = async (betAddress: string) => {
+  if (!provider) {
+    await initialize();
+  }
+  
+  const contract = new Contract(betAddress, Bet.abi, signer);
+  try {
+    const tx = await contract.cancel();
+    await tx.wait();
+    return true;
+  } catch (error) {
+    console.error("Failed to cancel the bet:", error);
+    return false;
+  }
+};
+
+export const setWinner = async (betAddress: string, winningOption: number) => {
+  if (!provider) {
+    await initialize();
+  }
+  
+  const contract = new Contract(betAddress, Bet.abi, signer);
+  try {
+    const tx = await contract.setWinner(winningOption);
+    await tx.wait();
+    return true;
+  } catch (error) {
+    console.error("Failed to set winner:", error);
+    return false;
+  }
+};
