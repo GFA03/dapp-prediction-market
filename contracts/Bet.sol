@@ -73,6 +73,10 @@ contract Bet is Ownable, IWithdrawal {
         return options;
     }
 
+    function getStatus() public view returns (Status) {
+        return status;
+    }
+
     function bet(uint _option) external payable canPlaceBet(_option) {
         bets[msg.sender] = BetRecord(_option, msg.value);
         bettors.push(msg.sender);
