@@ -1,4 +1,5 @@
 import React, { Dispatch, SetStateAction } from "react";
+import { Button } from "@mui/material";
 import { requestAccount } from "../utils/contractServices";
 
 interface ConnectWalletPageProps {
@@ -15,7 +16,13 @@ function ConnectWalletPage({ setAccount }: ConnectWalletPageProps) {
     }
   };
 
-  return <button onClick={connectWallet}>Connect Web3 Wallet</button>;
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+      <Button variant="contained" color="primary" onClick={connectWallet}>
+        Connect Web3 Wallet
+      </Button>
+    </div>
+  );
 }
 
 export default ConnectWalletPage;

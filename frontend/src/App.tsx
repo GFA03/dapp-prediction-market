@@ -1,48 +1,108 @@
 import React, { useEffect, useState } from "react";
-import { requestAccount } from "./utils/contractServices";
+import { getBalance, requestAccount } from "./utils/contractServices";
 import { ToastContainer } from "react-toastify";
 import ConnectWalletPage from "./components/ConnectWalletPage";
 import Dashboard from "./components/Dashboard";
+import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
+import AllBets from "./components/AllBets";
+import MyBets from "./components/MyBets";
+import "./index.css";
+import { AppBar, Tab, Tabs, Toolbar, Typography } from "@mui/material";
 
 function App() {
   const [account, setAccount] = useState<string | null>(null);
+  const [balance, setBalance] = useState<string>("0");
 
   useEffect(() => {
-    console.log('EFFECT 1');
     const fetchCurAccount = async () => {
       const account = await requestAccount();
-      console.log(`account in fetchCurAccount: ${account}`);
       setAccount(account);
     };
     fetchCurAccount();
-    console.log('EFFECT 1 DONE 🟢');
   }, []);
 
   useEffect(() => {
-    console.log('EFFECT 2');
     const handleAccountChanged = (newAccounts: any) =>
       setAccount(newAccounts.length > 0 ? newAccounts[0] : null);
 
     if (window.ethereum) {
       window.ethereum.on("accountsChanged", handleAccountChanged);
     }
-    console.log('EFFECT 2 DONE 🟢');
     return () => {
       window.ethereum?.removeListener("accountsChanged", handleAccountChanged);
     };
   });
 
+  useEffect(() => {
+    const fetchBalance = async () => {
+      if (!account) {
+        return;
+      }
+      const balance = await getBalance(account);
+      setBalance(balance || "0");
+    };
+    fetchBalance();
+  }, [account]);
+
+  const updateBalance = async () => {
+    if (!account) {
+      return;
+    }
+    const balance = await getBalance(account);
+    setBalance(balance || "0");
+  };
+
   return (
-    <div className="app">
-      <ToastContainer />
-      {!account ? (
-        <ConnectWalletPage setAccount={setAccount} />
-      ) : (
-        <div>
-          <Dashboard account={account} />
-        </div>
-      )}
-    </div>
+    <BrowserRouter>
+      <div className="min-h-screen bg-gray-100">
+        <ToastContainer />
+        {!account ? (
+          <ConnectWalletPage setAccount={setAccount} />
+        ) : (
+          <>
+            <AppBar position="static" className="bg-blue-600">
+              <Toolbar>
+                <Typography variant="h6" className="flex-grow">
+                  Betting DApp
+                </Typography>
+                <Tabs
+                  value={false}
+                  textColor="inherit"
+                  indicatorColor="secondary"
+                >
+                  <Tab label="Dashboard" to="/" component={Link} />
+                  <Tab label="All Bets" to="/all-bets" component={Link} />
+                  <Tab label="My Bets" to="/my-bets" component={Link} />
+                </Tabs>
+              </Toolbar>
+            </AppBar>
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  <Dashboard
+                    account={account}
+                    balance={balance}
+                    updateBalance={updateBalance}
+                  />
+                }
+              />
+              <Route
+                path="/all-bets"
+                element={
+                  <AllBets
+                    account={account}
+                    balance={balance}
+                    updateBalance={updateBalance}
+                  />
+                }
+              />
+              <Route path="/my-bets" element={<MyBets account={account} />} />
+            </Routes>
+          </>
+        )}
+      </div>
+    </BrowserRouter>
   );
 }
 

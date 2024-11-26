@@ -1,10 +1,15 @@
+import React from "react";
+import { Card, CardContent, Typography } from "@mui/material";
+
 function BetFactoryInfo({ account, balance }: { account: string; balance: string }) {
   return (
-    <div>
-      <h2>Contract Info</h2>
-      <p>Connected Account: {account}</p>
-      <p>Balance: {balance} ETH</p>
-    </div>
+    <Card sx={{ marginBottom: 3 }}>
+      <CardContent>
+        <Typography variant="h6">Contract Info</Typography>
+        <Typography>Connected Account: {account}</Typography>
+        <Typography>Balance: {balance} ETH</Typography>
+      </CardContent>
+    </Card>
   );
 }
 

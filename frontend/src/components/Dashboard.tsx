@@ -1,31 +1,14 @@
-import { useState, useEffect } from "react";
+import React from "react";
+import { Box } from "@mui/material";
 import BetFactoryInfo from "./BetFactoryInfo";
 import BetActions from "./BetActions";
-import { getBalance } from "../utils/contractServices";
 
-const Dashboard = ({ account }: { account: string }) => {
-  const [balance, setBalance] = useState<string>("0");
-
-  // Fetch balance when account changes
-  useEffect(() => {
-    const fetchBalance = async () => {
-      const balance = await getBalance(account);
-      setBalance(balance || "0");
-    };
-    fetchBalance();
-  }, [account]);
-
-  // Callback to update balance
-  const updateBalance = async () => {
-    const balance = await getBalance(account);
-    setBalance(balance || "0");
-  };
-
+const Dashboard = ({ account, balance, updateBalance }: { account: string; balance: string; updateBalance: () => void }) => {
   return (
-    <div>
+    <Box p={3}>
       <BetFactoryInfo account={account} balance={balance} />
       <BetActions account={account} balance={balance} updateBalance={updateBalance} />
-    </div>
+    </Box>
   );
 };
 
