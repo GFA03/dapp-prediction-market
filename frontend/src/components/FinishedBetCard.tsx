@@ -34,7 +34,7 @@ const FinishedBetCard: React.FC<FinishedBetCardProps> = ({
             StatusLabels[status as keyof typeof StatusLabels] === "Finished" ? "text-blue-500" : "text-gray-500"
           }`}
         >
-          Status: {status}
+          Status: {StatusLabels[status as keyof typeof StatusLabels]}
         </Typography>
         <Typography variant="body1" className="text-center text-gray-700 mt-4">
           Your Option: <span className="font-medium">{chosenOption}</span>
