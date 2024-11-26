@@ -108,20 +108,6 @@ export const getBetsCount = async () => {
   }
 };
 
-// Bet Contract Functions
-export const getBetDetails = async (address: string) => {
-  const betContract = await initializeBetContract(address);
-  try {
-    const name = await betContract.getName();
-    const options = await betContract.getOptions();
-    const status = Number(await betContract.getStatus());
-    return { name, options, status, address };
-  } catch (error: any) {
-    console.error("Error retrieving bet details ⭕", error.message);
-    return null;
-  }
-};
-
 export const placeBet = async (address: string, option: number, amount: string) => {
   const betContract = await initializeBetContract(address);
   try {
@@ -191,11 +177,12 @@ export const fetchAllOpenBets = async () => {
       if (status === BetStatus.Open) {
         const name = await betContract.getName();
         const options = await betContract.getOptions();
-        bets.push({ address: betAddress, name, options });
+        bets.push({ address: betAddress, name, options, status });
       }
     }
     offset += limit;
   }
+  return bets;
 }
 
 export const fetchUserBets = async (userAddress: string) =>

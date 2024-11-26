@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
 import {
-  getBetsAddresses,
-  getBetDetails,
   fetchCreatedBets,
   placeBet,
+  fetchAllOpenBets,
 } from "../utils/contractServices";
 import BetCard from "./BetCard";
 import { Bet } from "../models/Bet";
@@ -37,10 +36,7 @@ const AllBets = ({
       setLoading(true);
       try {
         if (selectedTab === 0) {
-          const addresses = await getBetsAddresses(10, 0);
-          const details = await Promise.all(
-            addresses.map(async (addr: string) => await getBetDetails(addr))
-          );
+          const details = await fetchAllOpenBets();
           setBets(details);
         } else if (selectedTab === 1) {
           const details = await fetchCreatedBets(account);
