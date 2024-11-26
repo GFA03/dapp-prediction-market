@@ -156,12 +156,14 @@ const fetchBets = async (
         const name = await betContract.getName();
         const options = await betContract.getOptions();
         const status = Number(await betContract.getStatus());
+        const balanceToWithdraw = Number(await betContract.getUserBalance({ from: userAddress }));
         const betData = await betContract.getBet({ from: userAddress });
         bets.push({
           address: betAddress,
           name,
           options,
           status,
+          balanceToWithdraw,
           betData,
         });
       }
@@ -200,14 +202,16 @@ export const fetchUserBets = async (userAddress: string) =>
   fetchBets(userAddress, async (betContract) => {
     const betData = await betContract.getBet({ from: userAddress });
     const status = Number(await betContract.getStatus());
-    return betData && Number(betData[1]) > 0 && (status === BetStatus.Open || status === BetStatus.Closed);
+    const balanceToWithdraw = Number(await betContract.getUserBalance({ from: userAddress }));
+    return betData && Number(betData[1]) > 0 && (status === BetStatus.Open || status === BetStatus.Closed || balanceToWithdraw > 0);
   });
 
 export const fetchUserHistoryBets = async (userAddress: string) =>
   fetchBets(userAddress, async (betContract) => {
     const betData = await betContract.getBet({ from: userAddress });
     const status = Number(await betContract.getStatus());
-    return betData && Number(betData[1]) > 0 && (status === BetStatus.Canceled || status === BetStatus.Finished);
+    const balanceToWithdraw = Number(await betContract.getUserBalance({ from: userAddress }));
+    return betData && Number(betData[1]) > 0 && ((status === BetStatus.Canceled || status === BetStatus.Finished) && balanceToWithdraw === 0);
   });
 
 export const fetchCreatedBets = async (userAddress: string) =>
@@ -237,3 +241,27 @@ export const cancelBet = (betAddress: string) =>
 
 export const setWinner = (betAddress: string, winningOption: number) =>
   manageBet(betAddress, (contract) => contract.setWinner(winningOption));
+
+export const cashbackBet = async (userAddress: string, betAddress: string) => {
+  const contract = await initializeBetContract(betAddress);
+  try {
+    const tx = await contract.cashbackBet({ from: userAddress });
+    await tx.wait();
+    return true;
+  } catch (error: any) {
+    console.error("Error cashing back bet ⭕", error.message);
+    return false;
+  }
+}
+
+export const withdrawBet = async (userAddress: string, betAddress: string) => {
+  const contract = await initializeBetContract(betAddress);
+  try {
+    const tx = await contract.withdraw({ from: userAddress });
+    await tx.wait();
+    return true;
+  } catch (error: any) {
+    console.error("Error withdrawing bet ⭕", error.message);
+    return false;
+  }
+}

@@ -10,6 +10,7 @@ export type UserBet = {
   name: string;
   options: string[];
   status: number;
+  balanceToWithdraw: number;
   betData: number[]; // [chosenOption, amount]
 };
 

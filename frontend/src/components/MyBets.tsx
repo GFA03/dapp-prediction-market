@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { fetchUserBets, fetchUserHistoryBets } from "../utils/contractServices";
+import { cashbackBet, fetchUserBets, fetchUserHistoryBets, withdrawBet } from "../utils/contractServices";
 import MyBetCard from "./MyBetCard";
 import { CircularProgress, Grid, Tab, Tabs, Typography } from "@mui/material";
 import { UserBet } from "../models/Bet";
@@ -33,9 +33,28 @@ const MyBets = ({ account }: { account: string }) => {
     }
   }, [account, selectedTab]);
 
-  const handleCashback = (betAddress: string) => {
+  const handleCashback = async (betAddress: string) => {
     console.log(`Cashback triggered for bet contract: ${betAddress}`);
-    // Integrate cashback logic here
+    try {
+      const success = await cashbackBet(account, betAddress);
+      if (success) {
+        alert("Cashback successful!");
+      }
+    } catch (error) {
+      console.error("Error cashing back bet:", error);
+    }
+  };
+
+  const handleWithdraw = async (betAddress: string) => {
+    console.log(`Withdraw triggered for bet contract: ${betAddress}`);
+    try {
+      const success = await withdrawBet(account, betAddress);
+      if (success) {
+        alert("Withdraw successful!");
+      }
+    } catch (error) {
+      console.error("Error withdrawing bet ⭕", error);
+    }
   };
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -62,15 +81,17 @@ const MyBets = ({ account }: { account: string }) => {
     return (
       <Grid container spacing={4}>
         {betsToRender.map((bet, idx) => (
-          <Grid item xs={12} sm={6} md={4} key={idx}>
+          <Grid item xs key={idx}>
             <MyBetCard
               key={idx}
               name={bet.name}
               options={bet.options}
               status={bet.status}
+              balanceToWithdraw={bet.balanceToWithdraw}
               chosenOption={bet.options[Number(bet.betData[0])]}
               amount={Number(bet.betData[1])}
               onCashback={() => handleCashback(bet.address)}
+              onWithdraw={() => handleWithdraw(bet.address)}
             />
           </Grid>
         ))}
@@ -100,7 +121,8 @@ const MyBets = ({ account }: { account: string }) => {
         {betsToRender.map((bet, idx) => {
           const chosenOption = bet.options[Number(bet.betData[0])];
           const amount = Number(bet.betData[1]);
-          const won = amount > 0; // Assuming a positive amount means the user won
+          //todo: Implement logic to determine if the user won the bet
+          const won = amount > 0;
   
           return (
             <Grid item xs={12} sm={6} md={4} key={idx}>

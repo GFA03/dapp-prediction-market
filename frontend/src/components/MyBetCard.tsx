@@ -6,12 +6,14 @@ type MyBetCardProps = {
   name: string;
   options: string[];
   status: number;
+  balanceToWithdraw: number;
   chosenOption: string;
   amount: number;
   onCashback: () => void;
+  onWithdraw: () => void;
 };
 
-const MyBetCard: React.FC<MyBetCardProps> = ({ name, options, status, chosenOption, amount, onCashback }) => {
+const MyBetCard: React.FC<MyBetCardProps> = ({ name, options, status, balanceToWithdraw, chosenOption, amount, onCashback, onWithdraw }) => {
   return (
     <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-lg p-4">
       <CardContent>
@@ -33,14 +35,21 @@ const MyBetCard: React.FC<MyBetCardProps> = ({ name, options, status, chosenOpti
         <Typography className="text-sm text-gray-600 mb-4">
           <span className="font-medium">Bet Amount:</span> {amount} wei
         </Typography>
-        <Button
+        {balanceToWithdraw === 0 ? <Button
           variant="contained"
           color="primary"
           className="mt-2 bg-blue-500 hover:bg-blue-600 text-white"
           onClick={onCashback}
         >
           Cashback
-        </Button>
+        </Button> : <Button
+          variant="contained"
+          color="primary"
+          className="mt-2 bg-blue-500 hover:bg-blue-600 text-white"
+          onClick={onWithdraw}
+        >
+          Withdraw: {balanceToWithdraw} wei
+        </Button>}
       </CardContent>
     </Card>
   );
