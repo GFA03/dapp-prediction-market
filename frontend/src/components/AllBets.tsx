@@ -17,7 +17,7 @@ import {
 import CreatedBetCard from "./CreatedBetCard";
 import { useSelector } from "react-redux";
 import { RootState, store } from "../store";
-import { selectBetsAfterOwner } from "../utils/betSlice";
+import { selectBetsAfterOwner, selectOpenBets } from "../utils/betSlice";
 
 const AllBets = ({
   account,
@@ -28,28 +28,10 @@ const AllBets = ({
   balance: string;
   updateBalance: () => void;
 }) => {
-  const [bets, setBets] = useState<Bet[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
   const [selectedTab, setSelectedTab] = useState<number>(0);
 
+  const bets = useSelector((state: RootState) => selectOpenBets(state));
   const createdBets = useSelector((state: RootState) => selectBetsAfterOwner(state, account));
-
-  useEffect(() => {
-    const fetchBets = async () => {
-      setLoading(true);
-      try {
-        if (selectedTab === 0) {
-          const details = await fetchAllOpenBets();
-          setBets(details);
-        }
-      } catch (error) {
-        console.error("Failed to fetch bets:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchBets();
-  }, [selectedTab, account]);
 
   const handlePlaceBet = async (
     address: string,
@@ -75,14 +57,6 @@ const AllBets = ({
   };
 
   const renderBets = (betsToRender: Bet[]) => {
-    if (loading) {
-      return (
-        <div className="flex justify-center items-center h-64">
-          <CircularProgress />
-        </div>
-      );
-    }
-
     if (betsToRender.length === 0) {
       return (
         <Typography variant="h6" className="text-center text-gray-500">
@@ -107,14 +81,6 @@ const AllBets = ({
   };
 
   const renderCreatedBets = (betsToRender: { address: string; name: string; options: string[]; status: number }[]) => {
-    if (loading) {
-      return (
-        <div className="flex justify-center items-center h-64">
-          <CircularProgress />
-        </div>
-      );
-    }
-  
     if (betsToRender.length === 0) {
       return (
         <Typography variant="h6" className="text-center text-gray-500">

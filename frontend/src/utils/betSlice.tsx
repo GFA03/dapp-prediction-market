@@ -68,5 +68,14 @@ export const selectBetsAfterOwner = createSelector(
   }
 );
 
+export const selectOpenBets = createSelector(
+  [selectBets, (_: RootState) => _],
+  (bets) => {
+    return Object.entries(bets)
+      .filter(([, bet]) => bet.status === 0)
+      .map(([address, bet]) => ({ address, ...bet }));
+  }
+)
+
 export const { addBet, addBettor, setBets } = betSlice.actions;
 export default betSlice.reducer;
