@@ -1,12 +1,6 @@
 import React, { useState } from "react";
 import { closeBet, cancelBet, setWinner } from "../utils/contractServices";
-import {
-  Card,
-  CardContent,
-  Typography,
-  Button,
-  TextField,
-} from "@mui/material";
+import { Card, CardContent, Typography, Button, Grid } from "@mui/material";
 import { StatusColors, StatusLabels } from "../models/Bet";
 
 const CreatedBetCard = ({
@@ -22,6 +16,11 @@ const CreatedBetCard = ({
 }) => {
   const [winnerOption, setWinnerOption] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+
+  const handleToggleWinner = (index: number) => {
+    // If the same option is clicked again, reset the winnerOption to null
+    setWinnerOption((prev) => (prev === index ? null : index));
+  };
 
   const handleClose = async () => {
     setLoading(true);
@@ -77,9 +76,7 @@ const CreatedBetCard = ({
             >
               Close Bet
             </Button>
-          ) : (
-            <></>
-          )}
+          ) : null}
           {StatusLabels[status as keyof typeof StatusLabels] === "Open" ? (
             <Button
               variant="outlined"
@@ -90,18 +87,31 @@ const CreatedBetCard = ({
             >
               Cancel Bet
             </Button>
-          ) : (
-            <></>
-          )}
+          ) : null}
           {StatusLabels[status as keyof typeof StatusLabels] === "Closed" ? (
             <div style={{ marginTop: "1rem" }}>
-              <TextField
-                type="number"
-                label="Winning Option"
-                value={winnerOption ?? ""}
-                onChange={(e) => setWinnerOption(Number(e.target.value))}
-                disabled={loading}
-              />
+              <Grid
+                container
+                spacing={2}
+                style={{ marginTop: "1rem", paddingBottom: "1rem" }}
+              >
+                {options.map((option, index) => (
+                  <Grid item xs={6} key={index}>
+                    <Button
+                      variant={
+                        winnerOption === index ? "contained" : "outlined"
+                      }
+                      color={winnerOption === index ? "success" : "primary"}
+                      fullWidth
+                      onClick={() => handleToggleWinner(index)}
+                      disabled={loading}
+                      className={winnerOption === index ? "bg-blue-500" : ""}
+                    >
+                      {option}
+                    </Button>
+                  </Grid>
+                ))}
+              </Grid>
               <Button
                 variant="contained"
                 color="success"
@@ -112,9 +122,7 @@ const CreatedBetCard = ({
                 Set Winner
               </Button>
             </div>
-          ) : (
-            <></>
-          )}
+          ) : null}
         </div>
       </CardContent>
     </Card>
