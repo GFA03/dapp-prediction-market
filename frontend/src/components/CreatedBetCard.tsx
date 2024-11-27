@@ -1,9 +1,5 @@
 import React, { useState } from "react";
-import {
-  closeBet,
-  cancelBet,
-  setWinner,
-} from "../utils/contractServices";
+import { closeBet, cancelBet, setWinner } from "../utils/contractServices";
 import {
   Card,
   CardContent,
@@ -12,8 +8,6 @@ import {
   TextField,
 } from "@mui/material";
 import { StatusColors, StatusLabels } from "../models/Bet";
-
-
 
 const CreatedBetCard = ({
   address,
@@ -44,7 +38,11 @@ const CreatedBetCard = ({
   };
 
   const handleSetWinner = async () => {
-    if (winnerOption === null || winnerOption < 0 || winnerOption >= options.length) {
+    if (
+      winnerOption === null ||
+      winnerOption < 0 ||
+      winnerOption >= options.length
+    ) {
       alert("Please select a valid winning option.");
       return;
     }
@@ -60,7 +58,9 @@ const CreatedBetCard = ({
         <Typography variant="h5">{name}</Typography>
         <Typography
           variant="body2"
-          className={`font-bold ${StatusColors[status as keyof typeof StatusColors]}`}
+          className={`font-bold ${
+            StatusColors[status as keyof typeof StatusColors]
+          }`}
         >
           Status: {StatusLabels[status as keyof typeof StatusLabels]}
         </Typography>
@@ -68,41 +68,53 @@ const CreatedBetCard = ({
           Options: {options.join(", ")}
         </Typography>
         <div style={{ marginTop: "1rem" }}>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleClose}
-            disabled={loading}
-          >
-            Close Bet
-          </Button>
-          <Button
-            variant="outlined"
-            color="error"
-            onClick={handleCancel}
-            disabled={loading}
-            style={{ marginLeft: "1rem" }}
-          >
-            Cancel Bet
-          </Button>
-          <div style={{ marginTop: "1rem" }}>
-            <TextField
-              type="number"
-              label="Winning Option"
-              value={winnerOption ?? ""}
-              onChange={(e) => setWinnerOption(Number(e.target.value))}
-              disabled={loading}
-            />
+          {StatusLabels[status as keyof typeof StatusLabels] === "Open" ? (
             <Button
               variant="contained"
-              color="success"
-              onClick={handleSetWinner}
+              color="primary"
+              onClick={handleClose}
+              disabled={loading}
+            >
+              Close Bet
+            </Button>
+          ) : (
+            <></>
+          )}
+          {StatusLabels[status as keyof typeof StatusLabels] === "Open" ? (
+            <Button
+              variant="outlined"
+              color="error"
+              onClick={handleCancel}
               disabled={loading}
               style={{ marginLeft: "1rem" }}
             >
-              Set Winner
+              Cancel Bet
             </Button>
-          </div>
+          ) : (
+            <></>
+          )}
+          {StatusLabels[status as keyof typeof StatusLabels] === "Closed" ? (
+            <div style={{ marginTop: "1rem" }}>
+              <TextField
+                type="number"
+                label="Winning Option"
+                value={winnerOption ?? ""}
+                onChange={(e) => setWinnerOption(Number(e.target.value))}
+                disabled={loading}
+              />
+              <Button
+                variant="contained"
+                color="success"
+                onClick={handleSetWinner}
+                disabled={loading}
+                style={{ marginLeft: "1rem" }}
+              >
+                Set Winner
+              </Button>
+            </div>
+          ) : (
+            <></>
+          )}
         </div>
       </CardContent>
     </Card>

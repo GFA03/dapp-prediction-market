@@ -150,7 +150,7 @@ const AllBets = ({
           centered
         >
           <Tab label="All Bets" />
-          <Tab label="My Bets" />
+          <Tab label="Created Bets" />
         </Tabs>
       </Box>
       {selectedTab === 0 ? renderBets(bets) : renderCreatedBets(createdBets)}
