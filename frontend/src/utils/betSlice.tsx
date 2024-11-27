@@ -59,12 +59,15 @@ const betSlice = createSlice({
       }>
     ) => {
       const { userAddress, betAddress, option, amount } = action.payload;
+
+      const userAddressLower = userAddress.toLowerCase();
     
-      if (!state.userBets[userAddress]) {
-        state.userBets[userAddress] = [];
+      if (!state.userBets[userAddressLower]) {
+        state.userBets[userAddressLower] = [];
       }
     
-      state.userBets[userAddress].push({ betAddress, option, amount });
+      state.userBets[userAddressLower].push({ betAddress, option, amount });
+      console.log("state.userBets", state.userBets[userAddressLower]);
     },
     setBets: (state, action: PayloadAction<BetState>) => {
       state.bets = action.payload.bets;
@@ -95,12 +98,16 @@ export const selectOpenBets = createSelector(
   }
 )
 
-export const selectUserBets = createSelector(
+
+export const selectUserActiveBets = createSelector(
   [
     (state: RootState) => state.bets.userBets,
     (_: RootState, userAddress: string) => userAddress,
   ],
-  (userBets, userAddress) => userBets[userAddress] || []
+  (userBets, userAddress) => {
+    console.log("userBets", userBets[userAddress.toLowerCase()]);
+    return userBets[userAddress.toLowerCase()] || [];
+  }
 );
 
 export const { addBet, addBettor, addUserBet, setBets } = betSlice.actions;

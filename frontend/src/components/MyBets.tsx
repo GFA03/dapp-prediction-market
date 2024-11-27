@@ -1,23 +1,30 @@
 import React, { useEffect, useState } from "react";
-import { cashbackBet, fetchUserBets, fetchUserHistoryBets, withdrawBet } from "../utils/contractServices";
+import {
+  cashbackBet,
+  fetchUserHistoryBets,
+  withdrawBet,
+} from "../utils/contractServices";
 import MyBetCard from "./MyBetCard";
 import { CircularProgress, Grid, Tab, Tabs, Typography } from "@mui/material";
 import { UserBet } from "../models/types";
 import FinishedBetCard from "./FinishedBetCard";
+import { useSelector } from "react-redux";
+import { RootState } from "../store";
+import { selectUserActiveBets } from "../utils/betSlice";
 
 const MyBets = ({ account }: { account: string }) => {
-  const [myBets, setMyBets] = useState<UserBet[]>([]);
   const [myHistoryBets, setMyHistoryBets] = useState<UserBet[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [selectedTab, setSelectedTab] = useState<number>(0);
 
+  const myBets = useSelector((state: RootState) =>
+    selectUserActiveBets(state, account.toLowerCase())
+  );
+
   useEffect(() => {
     const loadUserBets = async () => {
       try {
-        if (selectedTab === 0) {
-          const bets = await fetchUserBets(account);
-          setMyBets(bets);
-        } else if (selectedTab === 1) {
+        if (selectedTab === 1) {
           const history = await fetchUserHistoryBets(account);
           setMyHistoryBets(history);
         }
@@ -61,7 +68,11 @@ const MyBets = ({ account }: { account: string }) => {
     setSelectedTab(newValue);
   };
 
-  const renderUserBets = (betsToRender: UserBet[]) => {
+  const renderUserBets = (betsToRender: {
+    betAddress: string;
+    option: number;
+    amount: number;
+}[]) => {
     if (isLoading) {
       return (
         <div className="flex justify-center items-center h-64">
@@ -84,14 +95,11 @@ const MyBets = ({ account }: { account: string }) => {
           <Grid item xs key={idx}>
             <MyBetCard
               key={idx}
-              name={bet.name}
-              options={bet.options}
-              status={bet.status}
-              balanceToWithdraw={bet.balanceToWithdraw}
-              chosenOption={bet.options[Number(bet.betData[0])]}
-              amount={Number(bet.betData[1])}
-              onCashback={() => handleCashback(bet.address)}
-              onWithdraw={() => handleWithdraw(bet.address)}
+              betAddress={bet.betAddress}
+              chosenOption={Number(bet.option)}
+              amount={bet.amount}
+              onCashback={() => handleCashback(bet.betAddress)}
+              onWithdraw={() => handleWithdraw(bet.betAddress)}
             />
           </Grid>
         ))}
@@ -123,7 +131,7 @@ const MyBets = ({ account }: { account: string }) => {
           const amount = Number(bet.betData[1]);
           //todo: Implement logic to determine if the user won the bet
           const won = amount > 0;
-  
+
           return (
             <Grid item xs={12} sm={6} md={4} key={idx}>
               <FinishedBetCard

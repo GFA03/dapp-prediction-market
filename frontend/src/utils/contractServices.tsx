@@ -272,6 +272,22 @@ export const fetchUserHistoryBets = async (userAddress: string) =>
     );
   });
 
+export const fetchBettors = async (betAddress: string) => {
+  const betContract = await initializeBetContract(betAddress);
+  const bettors: {betAddress: string, bettorAddress: string, option: string, amount: string}[] = [];
+  const bets = await betContract.getBets();
+
+  if (bets.length !== 3) {
+    return [];
+  }
+
+  for (let i = 0; i < bets[0].length; i++) {
+    bettors.push({ betAddress, bettorAddress: bets[0][i], option: bets[1][i], amount: bets[2][i] });
+  } 
+  
+  return bettors;
+}
+
 export const fetchCreatedBets = async (userAddress: string) =>
   fetchBets(userAddress, async (betContract) => {
     const owner = await betContract.owner();

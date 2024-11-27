@@ -7,6 +7,7 @@ import Bet from "../artifacts/contracts/Bet.sol/Bet.json";
 import { AppDispatch } from "../store";
 import { MetaMaskInpageProvider } from "@metamask/providers";
 import { CONTRACT_ADDRESS } from "../utils/constants";
+import { fetchBettors } from "../utils/contractServices";
 
 const BetFactoryABI = BetFactory.abi;
 const BetABI = Bet.abi;
@@ -31,12 +32,12 @@ const EventListener: React.FC = () => {
 
       for (const log of logs) {
         const parsedLog = contract.interface.parseLog(log);
+        
         if (parsedLog === null) {
           continue;
         }
-        const { userAddress, betAddress } = parsedLog.args;
 
-        console.log("Found past BetCreated event:", userAddress, betAddress);
+        const { userAddress, betAddress } = parsedLog.args;
 
         // Fetch bet details
         const betContract = new Contract(betAddress, BetABI, provider);
@@ -55,55 +56,31 @@ const EventListener: React.FC = () => {
           })
         );
 
-        // Fetch past placed bets for this bet
-        fetchPastPlacedBets(betAddress);
+        // Fetch bettors for this bet
+        const currentBets = await fetchBettors(betAddress);
+
+        for (const bettor of currentBets) {
+          console.log("Adding bettor", bettor);
+          dispatch(
+            addBettor({
+              betAddress,
+              bettorAddress: bettor.bettorAddress,
+              option: Number(bettor.option),
+              amount: Number(bettor.amount),
+            })
+          );
+          dispatch(
+            addUserBet({
+              userAddress: bettor.bettorAddress,
+              betAddress,
+              option: Number(bettor.option),
+              amount: Number(bettor.amount),
+            })
+          );
+        }
 
         // Initialize event listeners for this bet
         listenToBetEvents(betAddress);
-      }
-    };
-
-    const fetchPastPlacedBets = async (betAddress: string) => {
-      // Fetch past BetEvent logs for this bet
-      const betContract = new Contract(betAddress, BetABI, provider);
-      const betFilter = betContract.filters.BetEvent();
-      const betLogs = await provider.getLogs({
-        ...betFilter,
-        fromBlock: 0, // Adjust as needed
-        toBlock: "latest",
-      });
-
-      for (const betLog of betLogs) {
-        const parsedBetLog = betContract.interface.parseLog(betLog);
-        if (parsedBetLog === null) {
-          continue;
-        }
-        const { bettor, option, amount } = parsedBetLog.args;
-
-        if (option === undefined || amount === undefined) {
-          continue;
-        }
-
-        console.log("Found past BetEvent:", bettor, option, amount);
-
-        // Dispatch to add the bettor
-        dispatch(
-          addBettor({
-            betAddress,
-            bettorAddress: bettor,
-            option: Number(option),
-            amount: Number(amount),
-          })
-        );
-
-        dispatch(
-          addUserBet({
-            userAddress: bettor,
-            betAddress,
-            option: Number(option),
-            amount: Number(amount),
-          })
-        );
       }
     };
 
