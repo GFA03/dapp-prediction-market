@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { BetState, Bettt } from "../models/types";
+import { BetState } from "../models/types";
 import { RootState } from "../store";
+import { createSelector } from "reselect";
 
 const initialState: BetState = {
   bets: {},
@@ -50,16 +51,18 @@ const betSlice = createSlice({
   },
 });
 
-export const selectBetsAfterOwner = (
-  state: RootState,
-  ownerAddress: string
-) => {
-  return Object.entries(state.bets.bets)
-    .filter(
-      ([, bet]) => bet.ownerAddress.toLowerCase() === ownerAddress.toLowerCase()
-    )
-    .map(([address, bet]) => ({ address, ...bet }));
-};
+const selectBets = (state: RootState) => state.bets.bets;
+
+export const selectBetsAfterOwner = createSelector(
+  [selectBets, (_: RootState, ownerAddress: string) => ownerAddress],
+  (bets, ownerAddress) =>
+    Object.entries(bets)
+      .filter(
+        ([, bet]) =>
+          bet.ownerAddress.toLowerCase() === ownerAddress.toLowerCase()
+      )
+      .map(([address, bet]) => ({ address, ...bet }))
+);
 
 export const { addBet, addBettor } = betSlice.actions;
 export default betSlice.reducer;
