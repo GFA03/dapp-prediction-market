@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getBalance, requestAccount } from "./utils/contractServices";
+import { fetchAllBets, getBalance, requestAccount } from "./utils/contractServices";
 import { ToastContainer } from "react-toastify";
 import ConnectWalletPage from "./components/ConnectWalletPage";
 import Dashboard from "./components/Dashboard";
@@ -9,10 +9,15 @@ import MyBets from "./components/MyBets";
 import "./index.css";
 import { AppBar, Tab, Tabs, Toolbar, Typography } from "@mui/material";
 import EventListener from "./components/EventListener";
+import { AppDispatch} from "./store";
+import { setBets } from "./utils/betSlice";
+import { useDispatch } from "react-redux";
 
 function App() {
   const [account, setAccount] = useState<string | null>(null);
   const [balance, setBalance] = useState<string>("0");
+
+  const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
     const fetchCurAccount = async () => {
@@ -21,6 +26,18 @@ function App() {
     };
     fetchCurAccount();
   }, []);
+
+  // initialize the redux state by fetching current bets
+  useEffect(() => {
+    const fetchBets = async () => {
+      if (!account) {
+        return;
+      }
+      const bets = await fetchAllBets();
+      dispatch(setBets(bets));
+    };
+    fetchBets();
+  }, [account]);
 
   useEffect(() => {
     const handleAccountChanged = (newAccounts: any) =>

@@ -48,6 +48,9 @@ const betSlice = createSlice({
         };
       }
     },
+    setBets: (state, action: PayloadAction<BetState>) => {
+      state.bets = action.payload.bets;
+    },
   },
 });
 
@@ -55,14 +58,15 @@ const selectBets = (state: RootState) => state.bets.bets;
 
 export const selectBetsAfterOwner = createSelector(
   [selectBets, (_: RootState, ownerAddress: string) => ownerAddress],
-  (bets, ownerAddress) =>
-    Object.entries(bets)
+  (bets, ownerAddress) => {
+    return Object.entries(bets)
       .filter(
         ([, bet]) =>
           bet.ownerAddress.toLowerCase() === ownerAddress.toLowerCase()
       )
-      .map(([address, bet]) => ({ address, ...bet }))
+      .map(([address, bet]) => ({ address, ...bet }));
+  }
 );
 
-export const { addBet, addBettor } = betSlice.actions;
+export const { addBet, addBettor, setBets } = betSlice.actions;
 export default betSlice.reducer;
