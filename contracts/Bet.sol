@@ -31,13 +31,13 @@ contract Bet is Ownable, IWithdrawal {
 
     event BetEvent(
         address indexed bettor,
-        uint indexed option,
-        uint indexed amount
+        uint option,
+        uint amount
     );
     event CloseEvent();
     event CancelEvent();
-    event CashbackEvent(address indexed bettor, uint indexed amount);
-    event WinnerEvent(address indexed winner, uint indexed amount);
+    event CashbackEvent(address indexed bettor, uint amount);
+    event WinnerEvent(address indexed winner, uint amount);
 
     constructor(
         string memory _name,
@@ -79,6 +79,20 @@ contract Bet is Ownable, IWithdrawal {
 
     function getUserBalance() public view returns (uint) {
         return balances[msg.sender];
+    }
+
+    function getBets() public view returns (address[] memory, uint[] memory, uint[] memory) {
+        address[] memory bettorsArray = new address[](bettors.length);
+        uint[] memory optionsArray = new uint[](bettors.length);
+        uint[] memory amountsArray = new uint[](bettors.length);
+
+        for (uint i = 0; i < bettors.length; i++) {
+            bettorsArray[i] = bettors[i];
+            optionsArray[i] = bets[bettors[i]].option;
+            amountsArray[i] = bets[bettors[i]].amount;
+        }
+
+        return (bettorsArray, optionsArray, amountsArray);
     }
 
     function bet(uint _option) external payable canPlaceBet(_option) {
