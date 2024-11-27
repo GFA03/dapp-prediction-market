@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
-import { BrowserProvider, Contract, ethers } from "ethers";
+import { BrowserProvider, Contract } from "ethers";
 import { useDispatch } from "react-redux";
-import { addBet, addBettor } from "../utils/betSlice";
+import { addBet, addBettor, addUserBet } from "../utils/betSlice";
 import BetFactory from "../artifacts/contracts/Bet_Factory.sol/Bet_Factory.json";
 import Bet from "../artifacts/contracts/Bet.sol/Bet.json";
 import { AppDispatch } from "../store";
@@ -20,14 +20,52 @@ const EventListener: React.FC = () => {
     );
     const contract = new Contract(CONTRACT_ADDRESS, BetFactoryABI, provider);
 
-    // Listen for BetCreated event
-    contract.on(
-      "BetCreated",
-      async (userAddress: string, betAddress: string) => {
-        // when creating bet, initializing listening for events
+    // Fetch past BetCreated events
+    const fetchPastBets = async () => {
+      const filter = contract.filters.BetCreated();
+      const logs = await provider.getLogs({
+        ...filter,
+        fromBlock: 0, // Adjust to a specific block number if needed
+        toBlock: "latest",
+      });
+
+      for (const log of logs) {
+        const parsedLog = contract.interface.parseLog(log);
+        if (parsedLog === null) {
+          continue;
+        }
+        const { userAddress, betAddress } = parsedLog.args;
+
+        console.log("Found past BetCreated event:", userAddress, betAddress);
+
+        // Fetch bet details
+        const betContract = new Contract(betAddress, BetABI, provider);
+        const name = await betContract.getName();
+        const options = await betContract.getOptions();
+        const status = Number(await betContract.getStatus());
+
+        // Dispatch to add the bet
+        dispatch(
+          addBet({
+            betAddress,
+            ownerAddress: userAddress,
+            name,
+            options,
+            status,
+          })
+        );
+
+        // Initialize event listeners for this bet
+        listenToBetEvents(betAddress);
+      }
+    };
+    
+    // Listen for new BetCreated events
+    const listenForNewBets = () => {
+      contract.on("BetCreated", async (userAddress: string, betAddress: string) => {
+        console.log("New BetCreated event received");
         listenToBetEvents(betAddress);
 
-        console.log("BetCreated event received");
         const betContract = new Contract(betAddress, BetABI, provider);
         const name = await betContract.getName();
         const options = await betContract.getOptions();
@@ -42,14 +80,14 @@ const EventListener: React.FC = () => {
             status,
           })
         );
-      }
-    );
+      });
+    };
 
     // Listen for BetEvent
     const listenToBetEvents = (betAddress: string) => {
       const betContract = new Contract(betAddress, BetABI, provider);
       betContract.on("BetEvent", (bettor, option, amount) => {
-        console.log("BetEvent event received");
+        console.log("BetEvent received");
         dispatch(
           addBettor({
             betAddress,
@@ -58,8 +96,19 @@ const EventListener: React.FC = () => {
             amount: amount.toNumber(),
           })
         );
+        dispatch(
+          addUserBet({
+            userAddress: bettor,
+            betAddress,
+            option: option.toNumber(),
+            amount: amount.toNumber(),
+          })
+        )
       });
     };
+
+    fetchPastBets();
+    listenForNewBets();
 
     // return () => {
     //   contract.removeAllListeners("BetCreated");

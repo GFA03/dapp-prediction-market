@@ -17,7 +17,6 @@ function App() {
   const [account, setAccount] = useState<string | null>(null);
   const [balance, setBalance] = useState<string>("0");
 
-  const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
     const fetchCurAccount = async () => {
@@ -26,18 +25,6 @@ function App() {
     };
     fetchCurAccount();
   }, []);
-
-  // initialize the redux state by fetching current bets
-  useEffect(() => {
-    const fetchBets = async () => {
-      if (!account) {
-        return;
-      }
-      const bets = await fetchAllBets();
-      dispatch(setBets(bets));
-    };
-    fetchBets();
-  }, [account]);
 
   useEffect(() => {
     const handleAccountChanged = (newAccounts: any) =>
