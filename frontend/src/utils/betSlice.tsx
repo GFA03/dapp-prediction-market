@@ -5,6 +5,7 @@ import { createSelector } from "reselect";
 
 const initialState: BetState = {
   bets: {},
+  userBets: {},
 };
 
 const betSlice = createSlice({
@@ -48,6 +49,23 @@ const betSlice = createSlice({
         };
       }
     },
+    addUserBet: (
+      state,
+      action: PayloadAction<{
+        userAddress: string;
+        betAddress: string;
+        option: number;
+        amount: number;
+      }>
+    ) => {
+      const { userAddress, betAddress, option, amount } = action.payload;
+    
+      if (!state.userBets[userAddress]) {
+        state.userBets[userAddress] = [];
+      }
+    
+      state.userBets[userAddress].push({ betAddress, option, amount });
+    },
     setBets: (state, action: PayloadAction<BetState>) => {
       state.bets = action.payload.bets;
     },
@@ -77,5 +95,13 @@ export const selectOpenBets = createSelector(
   }
 )
 
-export const { addBet, addBettor, setBets } = betSlice.actions;
+export const selectUserBets = createSelector(
+  [
+    (state: RootState) => state.bets.userBets,
+    (_: RootState, userAddress: string) => userAddress,
+  ],
+  (userBets, userAddress) => userBets[userAddress] || []
+);
+
+export const { addBet, addBettor, addUserBet, setBets } = betSlice.actions;
 export default betSlice.reducer;

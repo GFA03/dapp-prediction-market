@@ -1,22 +1,20 @@
 import React, { useEffect, useState } from "react";
 import {
   placeBet,
-  fetchAllOpenBets,
 } from "../utils/contractServices";
 import BetCard from "./BetCard";
-import { Bet, Bettt } from "../models/types";
+import { Bet } from "../models/types";
 import {
   Container,
   Typography,
   Grid,
-  CircularProgress,
   Tabs,
   Tab,
   Box,
 } from "@mui/material";
 import CreatedBetCard from "./CreatedBetCard";
 import { useSelector } from "react-redux";
-import { RootState, store } from "../store";
+import { RootState } from "../store";
 import { selectBetsAfterOwner, selectOpenBets } from "../utils/betSlice";
 
 const AllBets = ({

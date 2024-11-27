@@ -135,7 +135,7 @@ export const placeBet = async (
 export const fetchAllBets = async () => {
   await ensureInitialized();
 
-  const bets: BetState = {bets: {}};
+  const bets: BetState = {bets: {}, userBets: {}};
   let offset = 0;
   const limit = 20;
 
@@ -155,7 +155,7 @@ export const fetchAllBets = async () => {
     }
     offset += limit;
   }
-  
+
   return bets;
 }
 

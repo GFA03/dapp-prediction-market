@@ -43,4 +43,11 @@ export interface Bettt {
 
 export interface BetState {
   bets: Record<string, Bettt>; // Bet address as key
+  userBets: {
+    [userAddress: string]: Array<{
+      betAddress: string;
+      option: number;
+      amount: number;
+    }>;
+  }; // Bet address as key
 }

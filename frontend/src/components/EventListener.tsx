@@ -55,32 +55,82 @@ const EventListener: React.FC = () => {
           })
         );
 
+        // Fetch past placed bets for this bet
+        fetchPastPlacedBets(betAddress);
+
         // Initialize event listeners for this bet
         listenToBetEvents(betAddress);
       }
     };
-    
-    // Listen for new BetCreated events
-    const listenForNewBets = () => {
-      contract.on("BetCreated", async (userAddress: string, betAddress: string) => {
-        console.log("New BetCreated event received");
-        listenToBetEvents(betAddress);
 
-        const betContract = new Contract(betAddress, BetABI, provider);
-        const name = await betContract.getName();
-        const options = await betContract.getOptions();
-        const status = Number(await betContract.getStatus());
+    const fetchPastPlacedBets = async (betAddress: string) => {
+      // Fetch past BetEvent logs for this bet
+      const betContract = new Contract(betAddress, BetABI, provider);
+      const betFilter = betContract.filters.BetEvent();
+      const betLogs = await provider.getLogs({
+        ...betFilter,
+        fromBlock: 0, // Adjust as needed
+        toBlock: "latest",
+      });
 
+      for (const betLog of betLogs) {
+        const parsedBetLog = betContract.interface.parseLog(betLog);
+        if (parsedBetLog === null) {
+          continue;
+        }
+        const { bettor, option, amount } = parsedBetLog.args;
+
+        if (option === undefined || amount === undefined) {
+          continue;
+        }
+
+        console.log("Found past BetEvent:", bettor, option, amount);
+
+        // Dispatch to add the bettor
         dispatch(
-          addBet({
+          addBettor({
             betAddress,
-            ownerAddress: userAddress,
-            name,
-            options,
-            status,
+            bettorAddress: bettor,
+            option: Number(option),
+            amount: Number(amount),
           })
         );
-      });
+
+        dispatch(
+          addUserBet({
+            userAddress: bettor,
+            betAddress,
+            option: Number(option),
+            amount: Number(amount),
+          })
+        );
+      }
+    };
+
+    // Listen for new BetCreated events
+    const listenForNewBets = () => {
+      contract.on(
+        "BetCreated",
+        async (userAddress: string, betAddress: string) => {
+          console.log("New BetCreated event received");
+          listenToBetEvents(betAddress);
+
+          const betContract = new Contract(betAddress, BetABI, provider);
+          const name = await betContract.getName();
+          const options = await betContract.getOptions();
+          const status = Number(await betContract.getStatus());
+
+          dispatch(
+            addBet({
+              betAddress,
+              ownerAddress: userAddress,
+              name,
+              options,
+              status,
+            })
+          );
+        }
+      );
     };
 
     // Listen for BetEvent
@@ -103,7 +153,7 @@ const EventListener: React.FC = () => {
             option: option.toNumber(),
             amount: amount.toNumber(),
           })
-        )
+        );
       });
     };
 
