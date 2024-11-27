@@ -155,7 +155,7 @@ export const fetchAllBets = async () => {
     }
     offset += limit;
   }
-  console.log('bets:', bets);
+  
   return bets;
 }
 

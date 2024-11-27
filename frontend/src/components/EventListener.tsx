@@ -24,6 +24,9 @@ const EventListener: React.FC = () => {
     contract.on(
       "BetCreated",
       async (userAddress: string, betAddress: string) => {
+        // when creating bet, initializing listening for events
+        listenToBetEvents(betAddress);
+
         console.log("BetCreated event received");
         const betContract = new Contract(betAddress, BetABI, provider);
         const name = await betContract.getName();
@@ -41,6 +44,22 @@ const EventListener: React.FC = () => {
         );
       }
     );
+
+    // Listen for BetEvent
+    const listenToBetEvents = (betAddress: string) => {
+      const betContract = new Contract(betAddress, BetABI, provider);
+      betContract.on("BetEvent", (bettor, option, amount) => {
+        console.log("BetEvent event received");
+        dispatch(
+          addBettor({
+            betAddress,
+            bettorAddress: bettor,
+            option: option.toNumber(),
+            amount: amount.toNumber(),
+          })
+        );
+      });
+    };
 
     // return () => {
     //   contract.removeAllListeners("BetCreated");
