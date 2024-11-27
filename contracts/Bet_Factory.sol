@@ -7,12 +7,12 @@ contract Bet_Factory {
     uint256 private _maxLimit = 20;
     Bet[] private _deployedBets;
 
-    event BetCreated(address indexed betAddress);
+    event BetCreated(address indexed userAddress, address indexed betAddress);
 
     function createBet(string memory _name, string[] memory _options) public {
         Bet newBet = new Bet(_name, _options, msg.sender);
         _deployedBets.push(newBet);
-        emit BetCreated(address(newBet));
+        emit BetCreated(msg.sender, address(newBet));
     }
 
     function getBets(uint256 limit, uint256 offset) public view returns (Bet[] memory coll) {
