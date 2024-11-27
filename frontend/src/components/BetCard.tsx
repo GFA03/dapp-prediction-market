@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Card, CardContent, Typography, Button, Grid, TextField, Box } from "@mui/material";
-import { StatusColors, StatusLabels } from "../models/Bet";
+import { StatusColors, StatusLabels } from "../models/types";
 
 type BetCardProps = {
   name: string;

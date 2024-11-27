@@ -1,18 +1,17 @@
 import React, { useState } from "react";
 import { closeBet, cancelBet, setWinner } from "../utils/contractServices";
 import { Card, CardContent, Typography, Button, Grid } from "@mui/material";
-import { StatusColors, StatusLabels } from "../models/Bet";
+import { StatusColors, StatusLabels } from "../models/types";
 
 const CreatedBetCard = ({
-  address,
-  name,
-  options,
-  status,
+  bet: { address, name, options, status },
 }: {
-  address: string;
-  name: string;
-  options: string[];
-  status: number;
+  bet: {
+    address: string;
+    name: string;
+    options: string[];
+    status: number;
+  };
 }) => {
   const [winnerOption, setWinnerOption] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(false);

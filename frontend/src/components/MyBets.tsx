@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { cashbackBet, fetchUserBets, fetchUserHistoryBets, withdrawBet } from "../utils/contractServices";
 import MyBetCard from "./MyBetCard";
 import { CircularProgress, Grid, Tab, Tabs, Typography } from "@mui/material";
-import { UserBet } from "../models/Bet";
+import { UserBet } from "../models/types";
 import FinishedBetCard from "./FinishedBetCard";
 
 const MyBets = ({ account }: { account: string }) => {

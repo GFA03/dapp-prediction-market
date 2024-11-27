@@ -8,6 +8,7 @@ import AllBets from "./components/AllBets";
 import MyBets from "./components/MyBets";
 import "./index.css";
 import { AppBar, Tab, Tabs, Toolbar, Typography } from "@mui/material";
+import EventListener from "./components/EventListener";
 
 function App() {
   const [account, setAccount] = useState<string | null>(null);
@@ -56,6 +57,8 @@ function App() {
     <BrowserRouter>
       <div className="min-h-screen bg-gray-100">
         <ToastContainer />
+
+        <EventListener />
         {!account ? (
           <ConnectWalletPage setAccount={setAccount} />
         ) : (

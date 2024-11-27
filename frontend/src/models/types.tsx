@@ -27,3 +27,20 @@ export const StatusLabels = {
   2: "Canceled",
   3: "Finished",
 };
+
+export interface Bettor {
+  option: number;
+  amount: number;
+}
+
+export interface Bettt {
+  ownerAddress: string;
+  name: string;
+  options: string[];
+  status: number; 
+  bettors: Record<string, Bettor>; // Bettor address as key
+}
+
+export interface BetState {
+  bets: Record<string, Bettt>; // Bet address as key
+}

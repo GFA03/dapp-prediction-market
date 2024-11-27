@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
 import {
-  fetchCreatedBets,
   placeBet,
   fetchAllOpenBets,
 } from "../utils/contractServices";
 import BetCard from "./BetCard";
-import { Bet } from "../models/Bet";
+import { Bet, Bettt } from "../models/types";
 import {
   Container,
   Typography,
@@ -16,6 +15,9 @@ import {
   Box,
 } from "@mui/material";
 import CreatedBetCard from "./CreatedBetCard";
+import { useSelector } from "react-redux";
+import { RootState, store } from "../store";
+import { selectBetsAfterOwner } from "../utils/betSlice";
 
 const AllBets = ({
   account,
@@ -27,9 +29,10 @@ const AllBets = ({
   updateBalance: () => void;
 }) => {
   const [bets, setBets] = useState<Bet[]>([]);
-  const [createdBets, setCreatedBets] = useState<Bet[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedTab, setSelectedTab] = useState<number>(0);
+
+  const createdBets = useSelector((state: RootState) => selectBetsAfterOwner(state, account));
 
   useEffect(() => {
     const fetchBets = async () => {
@@ -38,9 +41,6 @@ const AllBets = ({
         if (selectedTab === 0) {
           const details = await fetchAllOpenBets();
           setBets(details);
-        } else if (selectedTab === 1) {
-          const details = await fetchCreatedBets(account);
-          setCreatedBets(details);
         }
       } catch (error) {
         console.error("Failed to fetch bets:", error);
@@ -106,7 +106,7 @@ const AllBets = ({
     );
   };
 
-  const renderCreatedBets = (betsToRender: Bet[]) => {
+  const renderCreatedBets = (betsToRender: { address: string; name: string; options: string[]; status: number }[]) => {
     if (loading) {
       return (
         <div className="flex justify-center items-center h-64">
@@ -127,7 +127,7 @@ const AllBets = ({
       <Grid container spacing={4}>
         {betsToRender.map((bet, idx) => (
           <Grid item xs={12} sm={6} md={4} key={idx}>
-            <CreatedBetCard {...bet} />
+            <CreatedBetCard bet={bet} />
           </Grid>
         ))}
       </Grid>

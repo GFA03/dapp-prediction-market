@@ -1,6 +1,6 @@
 import React from "react";
 import { Card, CardContent, Typography } from "@mui/material";
-import { StatusLabels } from "../models/Bet";
+import { StatusLabels } from "../models/types";
 
 type FinishedBetCardProps = {
   name: string;
