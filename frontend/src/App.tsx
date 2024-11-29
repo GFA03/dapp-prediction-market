@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { getBalance, requestAccount } from "./utils/contractServices";
 import { ToastContainer } from "react-toastify";
-import ConnectWalletPage from "./components/ConnectWalletPage";
-import Dashboard from "./components/Dashboard";
+import ConnectWalletPage from "./pages/ConnectWalletPage";
+import Dashboard from "./pages/Dashboard";
 import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
-import AllBets from "./components/AllBets";
-import MyBets from "./components/MyBets";
+import AllBets from "./pages/AllBets";
+import MyBets from "./pages/MyBets";
 import "./index.css";
 import { AppBar, Tab, Tabs, Toolbar, Typography } from "@mui/material";
-import EventListener from "./components/EventListener";
+import EventListener from "./EventListener";
 
 function App() {
   const [account, setAccount] = useState<string | null>(null);

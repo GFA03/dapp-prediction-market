@@ -3,7 +3,7 @@ import { Card, CardContent, Typography } from "@mui/material";
 import { StatusLabels } from "../models/types";
 import { useSelector } from "react-redux";
 import { selectBetByAddress } from "../utils/betSlice";
-import { RootState } from "../store";
+import { RootState } from "../utils/store";
 
 type FinishedBetCardProps = {
   betAddress: string;

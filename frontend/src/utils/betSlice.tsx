@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { BetState, BetStatus } from "../models/types";
-import { RootState } from "../store";
+import { RootState } from "./store";
 import { createSelector } from "reselect";
 
 const initialState: BetState = {

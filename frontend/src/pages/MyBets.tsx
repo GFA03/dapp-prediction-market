@@ -3,11 +3,11 @@ import {
   cashbackBet,
   withdrawBet,
 } from "../utils/contractServices";
-import MyBetCard from "./MyBetCard";
+import MyBetCard from "../components/MyBetCard";
 import { Grid, Tab, Tabs, Typography } from "@mui/material";
-import FinishedBetCard from "./FinishedBetCard";
+import FinishedBetCard from "../components/FinishedBetCard";
 import { useSelector } from "react-redux";
-import { RootState } from "../store";
+import { RootState } from "../utils/store";
 import { selectUserActiveBets, selectUserHistoryBets } from "../utils/betSlice";
 
 const MyBets = ({ account, updateBalance }: { account: string; updateBalance: () => void }) => {

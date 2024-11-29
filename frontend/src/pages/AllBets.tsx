@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { placeBet } from "../utils/contractServices";
-import BetCard from "./BetCard";
+import BetCard from "../components/BetCard";
 import { Container, Typography, Grid, Tabs, Tab, Box } from "@mui/material";
-import CreatedBetCard from "./CreatedBetCard";
+import CreatedBetCard from "../components/CreatedBetCard";
 import { useSelector } from "react-redux";
-import { RootState } from "../store";
+import { RootState } from "../utils/store";
 import { selectBetsAfterOwner, selectOpenBets } from "../utils/betSlice";
 import { Bettor } from "../models/types";
 

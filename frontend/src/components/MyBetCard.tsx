@@ -2,7 +2,7 @@ import React from "react";
 import { Button, Card, CardContent, Typography } from "@mui/material";
 import { StatusColors, StatusLabels } from "../models/types";
 import { useSelector } from "react-redux";
-import { RootState } from "../store";
+import { RootState } from "../utils/store";
 import { selectBetByAddress } from "../utils/betSlice";
 
 type MyBetCardProps = {

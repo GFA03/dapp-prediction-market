@@ -1,5 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
-import betReducer from "./utils/betSlice";
+import betReducer from "./betSlice";
 
 export const store = configureStore({
   reducer: {

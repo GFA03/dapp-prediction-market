@@ -10,13 +10,13 @@ import {
   closeBet,
   resetUserPayout,
   setWinner,
-} from "../utils/betSlice";
-import BetFactory from "../artifacts/contracts/Bet_Factory.sol/Bet_Factory.json";
-import Bet from "../artifacts/contracts/Bet.sol/Bet.json";
-import { AppDispatch } from "../store";
+} from "./utils/betSlice";
+import BetFactory from "./artifacts/contracts/Bet_Factory.sol/Bet_Factory.json";
+import Bet from "./artifacts/contracts/Bet.sol/Bet.json";
+import { AppDispatch } from "./utils/store";
 import { MetaMaskInpageProvider } from "@metamask/providers";
-import { CONTRACT_ADDRESS } from "../utils/constants";
-import { fetchPayoutsFromContract } from "../utils/contractServices";
+import { CONTRACT_ADDRESS } from "./utils/constants";
+import { fetchPayoutsFromContract } from "./utils/contractServices";
 
 const BetFactoryABI = BetFactory.abi;
 const BetABI = Bet.abi;

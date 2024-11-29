@@ -14,10 +14,10 @@ import {
   Typography,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { RootState } from "../store";
+import { RootState } from "../utils/store";
 import { useSelector } from "react-redux";
 
-const BetActions = ({
+const CreateBet = ({
   updateBalance,
 }: {
   updateBalance: () => void;
@@ -143,4 +143,4 @@ const BetActions = ({
   );
 };
 
-export default BetActions;
+export default CreateBet;
