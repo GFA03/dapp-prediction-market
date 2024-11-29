@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { fetchAllBets, getBalance, requestAccount } from "./utils/contractServices";
+import { getBalance, requestAccount } from "./utils/contractServices";
 import { ToastContainer } from "react-toastify";
 import ConnectWalletPage from "./components/ConnectWalletPage";
 import Dashboard from "./components/Dashboard";
@@ -9,9 +9,6 @@ import MyBets from "./components/MyBets";
 import "./index.css";
 import { AppBar, Tab, Tabs, Toolbar, Typography } from "@mui/material";
 import EventListener from "./components/EventListener";
-import { AppDispatch} from "./store";
-import { setBets } from "./utils/betSlice";
-import { useDispatch } from "react-redux";
 
 function App() {
   const [account, setAccount] = useState<string | null>(null);

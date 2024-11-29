@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { BetState, BetStatus, StatusLabels } from "../models/types";
+import { BetState, BetStatus } from "../models/types";
 import { RootState } from "../store";
 import { createSelector } from "reselect";
 
@@ -82,10 +82,7 @@ const betSlice = createSlice({
       if (bet) {
         bet.status = BetStatus.Canceled;
       }
-    },
-    setBets: (state, action: PayloadAction<BetState>) => {
-      state.bets = action.payload.bets;
-    },
+    }
   },
 });
 
@@ -153,5 +150,5 @@ export const selectUserHistoryBets = createSelector(
   }
 );
 
-export const { addBet, addBettor, addUserBet, closeBet, cancelBet, setBets } = betSlice.actions;
+export const { addBet, addBettor, addUserBet, closeBet, cancelBet } = betSlice.actions;
 export default betSlice.reducer;
