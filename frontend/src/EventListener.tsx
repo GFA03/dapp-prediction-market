@@ -13,6 +13,7 @@ import {
 } from "./utils/betSlice";
 import BetFactory from "./artifacts/contracts/Bet_Factory.sol/Bet_Factory.json";
 import Bet from "./artifacts/contracts/Bet.sol/Bet.json";
+import WithdrawalBase from "./artifacts/contracts/WithdrawalBase.sol/WithdrawalBase.json";
 import { AppDispatch } from "./utils/store";
 import { MetaMaskInpageProvider } from "@metamask/providers";
 import { CONTRACT_ADDRESS } from "./utils/constants";
@@ -20,6 +21,8 @@ import { fetchPayoutsFromContract } from "./utils/contractServices";
 
 const BetFactoryABI = BetFactory.abi;
 const BetABI = Bet.abi;
+const WithdrawalBaseABI = WithdrawalBase.abi;
+const BetWithdrawalABI = [...BetABI, ...WithdrawalBaseABI];
 
 const EventListener: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -205,7 +208,7 @@ const EventListener: React.FC = () => {
 
     // Listen for BetEvent
     const listenToBetEvents = (betAddress: string) => {
-      const betContract = new Contract(betAddress, BetABI, provider);
+      const betContract = new Contract(betAddress, BetWithdrawalABI, provider);
       betContract.on("BetPlaced", (bettor, option, amount) => {
         console.log("BetPlaced received");
         dispatch(
@@ -254,7 +257,7 @@ const EventListener: React.FC = () => {
         );
       });
 
-      betContract.on("WithdrawalEvent", (bettor) => {
+      betContract.on("WithdrawalEvent", (bettor, amount) => {
         console.log("New Withdrawal received");
         dispatch(
           resetUserPayout({

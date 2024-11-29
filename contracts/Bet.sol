@@ -2,11 +2,11 @@
 pragma solidity ^0.8.27;
 import "hardhat/console.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "./IWithdrawal.sol";
+import "./WithdrawalBase.sol";
 
 // pune limita pe optiuni (deocamdata poti pune infinit)
 
-contract Bet is Ownable, IWithdrawal {
+contract Bet is Ownable, WithdrawalBase {
     enum Status {
         Open,
         Closed,
@@ -26,9 +26,6 @@ contract Bet is Ownable, IWithdrawal {
     mapping(address => BetRecord) public bets;
     address[] public bettors;
 
-    // mapping for Withdrawal Pattern (how much money each bettor is to take)
-    mapping(address => uint) public balances;
-
     event BetPlaced(
         address indexed bettor,
         uint option,
@@ -39,7 +36,6 @@ contract Bet is Ownable, IWithdrawal {
     event DeclaredWinner(uint option);
     event CashbackEvent(address indexed bettor, uint amount);
     event PayoutEvent(address indexed bettor, uint amount);
-    event WithdrawalEvent(address indexed bettor);
 
     constructor(
         string memory _name,
@@ -142,8 +138,7 @@ contract Bet is Ownable, IWithdrawal {
                     totalAmount,
                     totalWinningAmount
                 );
-                balances[bettors[i]] += payout;
-
+                _updateBalance(bettors[i], payout);
                 emit PayoutEvent(bettors[i], payout);
             }
         }
@@ -156,15 +151,6 @@ contract Bet is Ownable, IWithdrawal {
     function getBet() external view returns (uint, uint) {
         BetRecord memory betRecord = bets[msg.sender];
         return (betRecord.option, betRecord.amount);
-    }
-
-    function withdraw() external {
-        uint amount = balances[msg.sender];
-        require(amount > 0, "No funds to withdraw");
-        balances[msg.sender] = 0;
-        payable(msg.sender).transfer(amount);
-
-        emit WithdrawalEvent(msg.sender);
     }
 
     function close() public onlyOwner {
@@ -186,10 +172,11 @@ contract Bet is Ownable, IWithdrawal {
     function restoreFunds() private {
         for (uint i = 0; i < bettors.length; i++) {
             address bettor = bettors[i];
-            BetRecord memory betRecord = bets[bettor];
-            payable(bettor).transfer(betRecord.amount);
-
-            emit CashbackEvent(bettor, betRecord.amount);
+            uint amount = bets[bettor].amount;
+            if (amount > 0) {
+                _updateBalance(bettor, amount);
+                emit CashbackEvent(bettor, amount);
+            }
         }
     }
 

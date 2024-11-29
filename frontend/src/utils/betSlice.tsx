@@ -181,7 +181,7 @@ export const selectUserHistoryBets = createSelector(
     if (!userBets[userAddress.toLowerCase()]) return [];
     return userBets[userAddress.toLowerCase()].filter(
       (bet) => 
-        bets[bet.betAddress.toLowerCase()].status === BetStatus.Canceled || (bets[bet.betAddress.toLowerCase()].status === BetStatus.Finished && bet.toWithdraw === 0)
+      (bets[bet.betAddress.toLowerCase()].status === BetStatus.Canceled || bets[bet.betAddress.toLowerCase()].status === BetStatus.Finished) && bet.toWithdraw === 0
     ) || [];
   }
 );
