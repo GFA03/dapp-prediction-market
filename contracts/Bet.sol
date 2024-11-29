@@ -34,8 +34,8 @@ contract Bet is Ownable, IWithdrawal {
         uint option,
         uint amount
     );
-    event CloseEvent();
-    event CancelEvent();
+    event BetClosed();
+    event BetCanceled();
     event CashbackEvent(address indexed bettor, uint amount);
     event WinnerEvent(address indexed winner, uint amount);
 
@@ -156,7 +156,7 @@ contract Bet is Ownable, IWithdrawal {
     function close() public onlyOwner {
         require(status == Status.Open, "Betting is closed");
         status = Status.Closed;
-        emit CloseEvent();
+        emit BetClosed();
     }
 
     function cancel() public onlyOwner {
@@ -165,7 +165,7 @@ contract Bet is Ownable, IWithdrawal {
         status = Status.Canceled;
         restoreFunds();
 
-        emit CancelEvent();
+        emit BetCanceled();
     }
 
     // function to return the bet amount to the bettor if the bet was canceled
