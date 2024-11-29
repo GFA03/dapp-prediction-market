@@ -3,6 +3,7 @@ import { Button, Card, CardContent, Typography } from "@mui/material";
 import { StatusColors, StatusLabels } from "../models/types";
 import { useSelector } from "react-redux";
 import { RootState } from "../store";
+import { selectBetByAddress } from "../utils/betSlice";
 
 type MyBetCardProps = {
   betAddress: string;
@@ -19,14 +20,9 @@ const MyBetCard: React.FC<MyBetCardProps> = ({
   onCashback,
   onWithdraw,
 }) => {
-  const { name, options, status } = useSelector((state: RootState) => {
-    const bet = state.bets.bets[betAddress];
-    return {
-      name: bet.name,
-      options: bet.options,
-      status: bet.status,
-    };
-  });
+  const betDetails = useSelector((state: RootState) => selectBetByAddress(state, betAddress));
+  if (!betDetails) return null;
+  const { name, options, status } = betDetails; 
   const balanceToWithdraw = 0;
   return (
     <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-lg p-4">
@@ -46,7 +42,7 @@ const MyBetCard: React.FC<MyBetCardProps> = ({
           <span className="font-medium">Options:</span> {options.join(", ")}
         </Typography>
         <Typography className="text-sm text-gray-600 mb-4">
-          <span className="font-medium">Your Choice:</span> {chosenOption}
+          <span className="font-medium">Your Choice:</span> {options[chosenOption]}
         </Typography>
         <Typography className="text-sm text-gray-600 mb-4">
           <span className="font-medium">Bet Amount:</span> {amount} wei

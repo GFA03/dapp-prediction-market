@@ -24,8 +24,8 @@ const betSlice = createSlice({
     ) => {
       const { betAddress, ownerAddress, name, options, status } =
         action.payload;
-      state.bets[betAddress] = {
-        ownerAddress,
+      state.bets[betAddress.toLowerCase()] = {
+        ownerAddress: ownerAddress.toLowerCase(),
         name,
         options,
         status,
@@ -42,8 +42,9 @@ const betSlice = createSlice({
       }>
     ) => {
       const { betAddress, bettorAddress, option, amount } = action.payload;
-      if (state.bets[betAddress]) {
-        state.bets[betAddress].bettors[bettorAddress] = {
+      const normalizedBetAddress = betAddress.toLowerCase();
+      if (state.bets[normalizedBetAddress]) {
+        state.bets[normalizedBetAddress].bettors[bettorAddress.toLowerCase()] = {
           option,
           amount,
         };
@@ -60,14 +61,13 @@ const betSlice = createSlice({
     ) => {
       const { userAddress, betAddress, option, amount } = action.payload;
 
-      const userAddressLower = userAddress.toLowerCase();
+      const normalizedUserAddress = userAddress.toLowerCase();
     
-      if (!state.userBets[userAddressLower]) {
-        state.userBets[userAddressLower] = [];
+      if (!state.userBets[normalizedUserAddress]) {
+        state.userBets[normalizedUserAddress] = [];
       }
     
-      state.userBets[userAddressLower].push({ betAddress, option, amount });
-      console.log("state.userBets", state.userBets[userAddressLower]);
+      state.userBets[normalizedUserAddress].push({ betAddress: betAddress.toLowerCase(), option, amount });
     },
     setBets: (state, action: PayloadAction<BetState>) => {
       state.bets = action.payload.bets;
@@ -76,6 +76,15 @@ const betSlice = createSlice({
 });
 
 const selectBets = (state: RootState) => state.bets.bets;
+
+export const selectBetByAddress = createSelector(
+  [selectBets, (_: RootState, betAddress: string) => betAddress.toLowerCase()],
+  (bets, normalizedBetAddress) => {
+    const bet = bets[normalizedBetAddress];
+    if (!bet) return null;
+    return bet;
+  }
+);
 
 export const selectBetsAfterOwner = createSelector(
   [selectBets, (_: RootState, ownerAddress: string) => ownerAddress],
@@ -98,14 +107,12 @@ export const selectOpenBets = createSelector(
   }
 )
 
-
 export const selectUserActiveBets = createSelector(
   [
     (state: RootState) => state.bets.userBets,
     (_: RootState, userAddress: string) => userAddress,
   ],
   (userBets, userAddress) => {
-    console.log("userBets", userBets[userAddress.toLowerCase()]);
     return userBets[userAddress.toLowerCase()] || [];
   }
 );
