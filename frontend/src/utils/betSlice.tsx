@@ -90,6 +90,7 @@ const betSlice = createSlice({
       const bet = state.bets[normalizedBetAddress];
       if (bet) {
         bet.winningOption = winningOption;
+        bet.status = BetStatus.Finished;
       }
     }
   },
