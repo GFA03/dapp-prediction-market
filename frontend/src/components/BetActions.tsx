@@ -2,9 +2,15 @@ import React, { useState, useEffect } from "react";
 import { createBet, getBetsCount } from "../utils/contractServices";
 import { Box, Button, TextField, Typography } from "@mui/material";
 
-
-
-const BetActions = ({ account, balance, updateBalance }: { account: string; balance: string; updateBalance: () => void }) => {
+const BetActions = ({
+  account,
+  balance,
+  updateBalance,
+}: {
+  account: string;
+  balance: string;
+  updateBalance: () => void;
+}) => {
   const [title, setTitle] = useState("");
   const [options, setOptions] = useState<string[]>([]);
   const [optionInput, setOptionInput] = useState("");
@@ -19,10 +25,11 @@ const BetActions = ({ account, balance, updateBalance }: { account: string; bala
     setBetCount(count);
   };
 
-
   const handleCreateBet = async () => {
     if (!title || options.length < 2 || options.length > 8) {
-      alert("Please enter a title and at least two options or maximum 8 options.");
+      alert(
+        "Please enter a title and at least two options or maximum 8 options."
+      );
       return;
     }
 
@@ -30,7 +37,7 @@ const BetActions = ({ account, balance, updateBalance }: { account: string; bala
     setTitle("");
     setOptions([]);
     setOptionInput("");
-    fetchBetsCount();  // Refresh bet count
+    fetchBetsCount(); // Refresh bet count
     updateBalance();
   };
 
@@ -41,10 +48,14 @@ const BetActions = ({ account, balance, updateBalance }: { account: string; bala
     }
   };
 
-  
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "Enter") {
+      handleAddOption();
+    }
+  };
 
-    return (
-      <Box>
+  return (
+    <Box>
       <Typography variant="h5" gutterBottom>
         Create a Bet
       </Typography>
@@ -59,10 +70,16 @@ const BetActions = ({ account, balance, updateBalance }: { account: string; bala
         label="Option"
         value={optionInput}
         onChange={(e) => setOptionInput(e.target.value)}
+        onKeyDown={handleKeyDown}
         fullWidth
         margin="normal"
       />
-      <Button variant="outlined" color="primary" onClick={handleAddOption} className="mt-2">
+      <Button
+        variant="outlined"
+        color="primary"
+        onClick={handleAddOption}
+        className="mt-2"
+      >
         Add Option
       </Button>
       <Box mt={2}>
@@ -72,7 +89,12 @@ const BetActions = ({ account, balance, updateBalance }: { account: string; bala
           </Typography>
         ))}
       </Box>
-      <Button variant="contained" color="success" onClick={handleCreateBet} sx={{ marginTop: 2 }}>
+      <Button
+        variant="contained"
+        color="success"
+        onClick={handleCreateBet}
+        sx={{ marginTop: 2 }}
+      >
         Create Bet
       </Button>
       <Typography variant="h6" mt={3}>
