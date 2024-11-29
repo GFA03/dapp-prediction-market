@@ -9,6 +9,7 @@ type MyBetCardProps = {
   betAddress: string;
   chosenOption: number;
   amount: number;
+  balanceToWithdraw: number;
   onCashback: () => void;
   onWithdraw: () => void;
 };
@@ -17,13 +18,13 @@ const MyBetCard: React.FC<MyBetCardProps> = ({
   betAddress,
   chosenOption,
   amount,
+  balanceToWithdraw,
   onCashback,
   onWithdraw,
 }) => {
   const betDetails = useSelector((state: RootState) => selectBetByAddress(state, betAddress));
   if (!betDetails) return null;
-  const { name, options, status } = betDetails; 
-  const balanceToWithdraw = 0;
+  const { name, options, status } = betDetails;
   return (
     <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-lg p-4">
       <CardContent>

@@ -38,6 +38,8 @@ contract Bet is Ownable, IWithdrawal {
     event BetCanceled();
     event DeclaredWinner(uint option);
     event CashbackEvent(address indexed bettor, uint amount);
+    event PayoutEvent(address indexed bettor, uint amount);
+    event WithdrawalEvent(address indexed bettor);
 
     constructor(
         string memory _name,
@@ -77,8 +79,16 @@ contract Bet is Ownable, IWithdrawal {
         return status;
     }
 
-    function getUserBalance() public view returns (uint) {
-        return balances[msg.sender];
+    function getPayouts() public view returns (address[] memory, uint[] memory) {
+        address[] memory bettorsArray = new address[](bettors.length);
+        uint[] memory balancesArray = new uint[](bettors.length);
+
+        for (uint i = 0; i < bettors.length; i++) {
+            bettorsArray[i] = bettors[i];
+            balancesArray[i] = balances[bettors[i]];
+        }
+
+        return (bettorsArray, balancesArray);
     }
 
     function getBets() public view returns (address[] memory, uint[] memory, uint[] memory) {
@@ -133,6 +143,8 @@ contract Bet is Ownable, IWithdrawal {
                     totalWinningAmount
                 );
                 balances[bettors[i]] += payout;
+
+                emit PayoutEvent(bettors[i], payout);
             }
         }
     }
@@ -151,6 +163,8 @@ contract Bet is Ownable, IWithdrawal {
         require(amount > 0, "No funds to withdraw");
         balances[msg.sender] = 0;
         payable(msg.sender).transfer(amount);
+
+        emit WithdrawalEvent(msg.sender);
     }
 
     function close() public onlyOwner {

@@ -5,8 +5,10 @@ import {
   addBet,
   addBettor,
   addUserBet,
+  addPayoutToUser,
   cancelBet,
   closeBet,
+  resetUserPayout,
   setWinner,
 } from "../utils/betSlice";
 import BetFactory from "../artifacts/contracts/Bet_Factory.sol/Bet_Factory.json";
@@ -14,6 +16,7 @@ import Bet from "../artifacts/contracts/Bet.sol/Bet.json";
 import { AppDispatch } from "../store";
 import { MetaMaskInpageProvider } from "@metamask/providers";
 import { CONTRACT_ADDRESS } from "../utils/constants";
+import { fetchPayoutsFromContract } from "../utils/contractServices";
 
 const BetFactoryABI = BetFactory.abi;
 const BetABI = Bet.abi;
@@ -72,8 +75,11 @@ const EventListener: React.FC = () => {
         // Fetch bettors for this bet
         fetchPastBettors(betAddress);
 
-        // Look for declared winner
+        // Verify already declared winner
         fetchWinner(betAddress);
+
+        // Fetch users to be paid
+        fetchPayouts(betAddress);
 
         // Initialize event listeners for this bet
         listenToBetEvents(betAddress);
@@ -157,6 +163,20 @@ const EventListener: React.FC = () => {
       }
     };
 
+    const fetchPayouts = async (betAddress: string) => {
+      const payouts = await fetchPayoutsFromContract(betAddress);
+      console.log("Payouts for bet", betAddress, payouts);
+      for (const payout of payouts) {
+        dispatch(
+          addPayoutToUser({
+            userAddress: payout.bettor,
+            betAddress,
+            amount: payout.amount,
+          })
+        );
+      }
+    }
+
     // Listen for new BetCreated events
     const listenForNewBets = () => {
       contract.on(
@@ -222,6 +242,27 @@ const EventListener: React.FC = () => {
           setWinner({ betAddress, winningOption: Number(winningOption) })
         );
       });
+
+      betContract.on("PayoutEvent", (bettor, amount) => {
+        console.log("New Payout received");
+        dispatch(
+          addPayoutToUser({
+            userAddress: bettor,
+            betAddress,
+            amount: Number(amount),
+          })
+        );
+      });
+
+      betContract.on("WithdrawalEvent", (bettor) => {
+        console.log("New Withdrawal received");
+        dispatch(
+          resetUserPayout({
+            userAddress: bettor,
+            betAddress,
+          })
+        )
+      })
     };
 
     fetchPastBets();

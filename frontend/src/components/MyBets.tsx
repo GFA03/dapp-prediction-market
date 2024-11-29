@@ -10,7 +10,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../store";
 import { selectUserActiveBets, selectUserHistoryBets } from "../utils/betSlice";
 
-const MyBets = ({ account }: { account: string }) => {
+const MyBets = ({ account, updateBalance }: { account: string; updateBalance: () => void }) => {
   const [selectedTab, setSelectedTab] = useState<number>(0);
 
   const myBets = useSelector((state: RootState) =>
@@ -26,6 +26,7 @@ const MyBets = ({ account }: { account: string }) => {
     try {
       const success = await cashbackBet(account, betAddress);
       if (success) {
+        updateBalance();
         alert("Cashback successful!");
       }
     } catch (error) {
@@ -38,6 +39,7 @@ const MyBets = ({ account }: { account: string }) => {
     try {
       const success = await withdrawBet(account, betAddress);
       if (success) {
+        updateBalance();
         alert("Withdraw successful!");
       }
     } catch (error) {
@@ -53,6 +55,7 @@ const MyBets = ({ account }: { account: string }) => {
     betAddress: string;
     option: number;
     amount: number;
+    toWithdraw: number;
 }[]) => {
     if (betsToRender.length === 0) {
       return (
@@ -71,6 +74,7 @@ const MyBets = ({ account }: { account: string }) => {
               betAddress={bet.betAddress}
               chosenOption={Number(bet.option)}
               amount={bet.amount}
+              balanceToWithdraw={bet.toWithdraw}
               onCashback={() => handleCashback(bet.betAddress)}
               onWithdraw={() => handleWithdraw(bet.betAddress)}
             />

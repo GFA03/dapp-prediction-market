@@ -101,7 +101,7 @@ function App() {
                   />
                 }
               />
-              <Route path="/my-bets" element={<MyBets account={account} />} />
+              <Route path="/my-bets" element={<MyBets account={account} updateBalance={updateBalance} />} />
             </Routes>
           </>
         )}

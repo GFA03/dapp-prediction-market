@@ -40,6 +40,7 @@ export interface BetState {
       betAddress: string;
       option: number;
       amount: number;
+      toWithdraw: number;
     }>;
   }; // Bet address as key
 }

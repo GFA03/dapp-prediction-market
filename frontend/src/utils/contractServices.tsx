@@ -171,3 +171,21 @@ export const withdrawBet = async (userAddress: string, betAddress: string) => {
     return false;
   }
 };
+
+export const fetchPayoutsFromContract = async (betAddress: string) => {
+  const contract = await initializeBetContract(betAddress);
+  try {
+    const balances = [];
+    const payouts = await contract.getPayouts();
+    for (let i = 0; i < payouts.length; i++) {
+      const bettor = payouts[0][i];
+      const amount = payouts[1][i];
+      console.log(`Payout for ${bettor}: ${amount}`);
+      balances.push({ bettor, amount: Number(amount) });
+    }
+    return balances;
+  } catch (error: any) {
+    console.error("Error fetching payouts ⭕", error.message);
+    return [];
+  }
+}
