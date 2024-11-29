@@ -177,7 +177,7 @@ export const fetchPayoutsFromContract = async (betAddress: string) => {
   try {
     const balances = [];
     const payouts = await contract.getPayouts();
-    for (let i = 0; i < payouts.length; i++) {
+    for (let i = 0; i < payouts[0].length; i++) {
       const bettor = payouts[0][i];
       const amount = payouts[1][i];
       console.log(`Payout for ${bettor}: ${amount}`);
