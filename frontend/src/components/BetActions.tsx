@@ -1,6 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { createBet, getBetsCount } from "../utils/contractServices";
-import { Box, Button, TextField, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  IconButton,
+  List,
+  ListItem,
+  ListItemSecondaryAction,
+  ListItemText,
+  TextField,
+  Typography,
+} from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 const BetActions = ({
   account,
@@ -54,53 +67,88 @@ const BetActions = ({
     }
   };
 
+  const handleDeleteOption = (index: number) => {
+    setOptions((prev) => prev.filter((_, i) => i !== index));
+  };
+
   return (
-    <Box>
-      <Typography variant="h5" gutterBottom>
-        Create a Bet
-      </Typography>
-      <TextField
-        label="Bet Title"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        fullWidth
-        margin="normal"
-      />
-      <TextField
-        label="Option"
-        value={optionInput}
-        onChange={(e) => setOptionInput(e.target.value)}
-        onKeyDown={handleKeyDown}
-        fullWidth
-        margin="normal"
-      />
-      <Button
-        variant="outlined"
-        color="primary"
-        onClick={handleAddOption}
-        className="mt-2"
-      >
-        Add Option
-      </Button>
-      <Box mt={2}>
-        {options.map((option, idx) => (
-          <Typography key={idx} variant="body1">
-            - {option}
-          </Typography>
-        ))}
-      </Box>
-      <Button
-        variant="contained"
-        color="success"
-        onClick={handleCreateBet}
-        sx={{ marginTop: 2 }}
-      >
-        Create Bet
-      </Button>
-      <Typography variant="h6" mt={3}>
-        Total Bets: {betCount}
-      </Typography>
-    </Box>
+    <Card
+      sx={{
+        maxWidth: 600,
+        margin: "auto",
+        marginTop: 4,
+        padding: 3,
+        boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+      }}
+    >
+      <CardContent>
+        <Typography variant="h5" gutterBottom>
+          Create a Bet
+        </Typography>
+        <TextField
+          label="Bet Title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          fullWidth
+          margin="normal"
+        />
+        <TextField
+          label="Option"
+          value={optionInput}
+          onChange={(e) => setOptionInput(e.target.value)}
+          onKeyDown={handleKeyDown}
+          fullWidth
+          margin="normal"
+          helperText="Press Enter to add an option."
+        />
+        <Button
+          variant="outlined"
+          color="primary"
+          onClick={handleAddOption}
+          className="mt-2"
+        >
+          Add Option
+        </Button>
+        <Box mt={2}>
+          <List>
+            {options.map((option, idx) => (
+              <ListItem
+                key={idx}
+                divider
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <ListItemText primary={option} />
+                <ListItemSecondaryAction>
+                  <IconButton
+                    edge="end"
+                    color="error"
+                    onClick={() => handleDeleteOption(idx)}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </ListItemSecondaryAction>
+              </ListItem>
+            ))}
+          </List>
+        </Box>
+        <Button
+          variant="contained"
+          color="success"
+          onClick={handleCreateBet}
+          sx={{ marginTop: 2 }}
+          fullWidth
+        >
+          Create Bet
+        </Button>
+        <Typography variant="h6" mt={3}>
+          Total Bets: {betCount}
+        </Typography>
+      </CardContent>
+    </Card>
   );
 };
 
