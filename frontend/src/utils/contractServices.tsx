@@ -10,19 +10,12 @@ import {
 } from "ethers";
 import { CONTRACT_ADDRESS } from "./constants";
 import { MetaMaskInpageProvider } from "@metamask/providers";
-import { BetState, Bettt, UserBet } from "../models/types";
+import { BetState, } from "../models/types";
 
 declare global {
   interface Window {
     ethereum?: MetaMaskInpageProvider;
   }
-}
-
-enum BetStatus {
-  Open = 0,
-  Closed = 1,
-  Canceled = 2,
-  Finished = 3,
 }
 
 // Global Variables
@@ -159,119 +152,6 @@ export const fetchAllBets = async () => {
   return bets;
 }
 
-// Fetch Bets
-const fetchBets = async (
-  userAddress: string,
-  filterFn: (contract: Contract) => Promise<boolean>
-) => {
-  await ensureInitialized();
-  const bets: UserBet[] = [];
-  let offset = 0;
-  const limit = 20;
-
-  while (true) {
-    const count = await getBetsCount();
-    if (count - offset <= 0) break;
-
-    const deployedBets = await getBetsAddresses(limit, offset);
-    for (const betAddress of deployedBets) {
-      const betContract = await initializeBetContract(betAddress);
-      if (await filterFn(betContract)) {
-        const filter = betContract.filters.BetPlaced(userAddress);
-
-        const logs = await betContract.queryFilter(filter);
-        console.log(`Logs for ${betAddress}: ${logs.length}`);
-        console.log(logs);
-        for (const log of logs) {
-          console.log(`Contract ${betAddress}: \n`);
-          console.log((log as EventLog).args?.at(0));
-          // console.log(`BetEvent: ${log.args?.user}, ${log.args?.option}, ${log.args?.amount}`);
-        }
-
-
-        const name = await betContract.getName();
-        const options = await betContract.getOptions();
-        const status = Number(await betContract.getStatus());
-        const balanceToWithdraw = Number(
-          await betContract.getUserBalance({ from: userAddress })
-        );
-        const betData = await betContract.getBet({ from: userAddress });
-        bets.push({
-          address: betAddress,
-          name,
-          options,
-          status,
-          balanceToWithdraw,
-          betData,
-        });
-      }
-    }
-    offset += limit;
-  }
-  return bets;
-};
-
-export const fetchAllOpenBets = async () => {
-  await ensureInitialized();
-
-  const bets = [];
-  let offset = 0;
-  const limit = 20;
-
-  while (true) {
-    const count = await getBetsCount();
-    if (count - offset <= 0) break;
-
-    const deployedBets = await getBetsAddresses(limit, offset);
-    for (const betAddress of deployedBets) {
-      const betContract = await initializeBetContract(betAddress);
-      // betContract.on("BetPlaced", (user, option, amount) => {
-      //   console.log(`Contract ${betAddress}: \n`);
-      //   console.log(`BetEvent: ${user}, ${option}, ${amount}`);
-      // });
-      const status = Number(await betContract.getStatus());
-      if (status === BetStatus.Open) {
-        const name = await betContract.getName();
-        const options = await betContract.getOptions();
-        bets.push({ address: betAddress, name, options, status });
-      }
-    }
-    offset += limit;
-  }
-  return bets;
-};
-
-export const fetchUserBets = async (userAddress: string) =>
-  fetchBets(userAddress, async (betContract) => {
-    const betData = await betContract.getBet({ from: userAddress });
-    const status = Number(await betContract.getStatus());
-    const balanceToWithdraw = Number(
-      await betContract.getUserBalance({ from: userAddress })
-    );
-    return (
-      betData &&
-      Number(betData[1]) > 0 &&
-      (status === BetStatus.Open ||
-        status === BetStatus.Closed ||
-        balanceToWithdraw > 0)
-    );
-  });
-
-export const fetchUserHistoryBets = async (userAddress: string) =>
-  fetchBets(userAddress, async (betContract) => {
-    const betData = await betContract.getBet({ from: userAddress });
-    const status = Number(await betContract.getStatus());
-    const balanceToWithdraw = Number(
-      await betContract.getUserBalance({ from: userAddress })
-    );
-    return (
-      betData &&
-      Number(betData[1]) > 0 &&
-      (status === BetStatus.Canceled || status === BetStatus.Finished) &&
-      balanceToWithdraw === 0
-    );
-  });
-
 export const fetchBettors = async (betAddress: string) => {
   const betContract = await initializeBetContract(betAddress);
   const bettors: {betAddress: string, bettorAddress: string, option: string, amount: string}[] = [];
@@ -287,12 +167,6 @@ export const fetchBettors = async (betAddress: string) => {
   
   return bettors;
 }
-
-export const fetchCreatedBets = async (userAddress: string) =>
-  fetchBets(userAddress, async (betContract) => {
-    const owner = await betContract.owner();
-    return owner.toLowerCase() === userAddress.toLowerCase();
-  });
 
 // Bet Management
 const manageBet = async (

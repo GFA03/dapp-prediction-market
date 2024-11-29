@@ -1,19 +1,3 @@
-export type Bet = {
-  name: string;
-  options: string[];
-  status: number;
-  address: string;
-};
-
-export type UserBet = {
-  address: string;
-  name: string;
-  options: string[];
-  status: number;
-  balanceToWithdraw: number;
-  betData: number[]; // [chosenOption, amount]
-};
-
 export const StatusColors = {
   0: "text-green-500", // Open
   1: "text-gray-500", // Closed
@@ -28,12 +12,19 @@ export const StatusLabels = {
   3: "Finished",
 };
 
+export enum BetStatus {
+  Open = 0,
+  Closed = 1,
+  Canceled = 2,
+  Finished = 3,
+}
+
 export interface Bettor {
   option: number;
   amount: number;
 }
 
-export interface Bettt {
+export interface Bet {
   ownerAddress: string;
   name: string;
   options: string[];
@@ -42,7 +33,7 @@ export interface Bettt {
 }
 
 export interface BetState {
-  bets: Record<string, Bettt>; // Bet address as key
+  bets: Record<string, Bet>; // Bet address as key
   userBets: {
     [userAddress: string]: Array<{
       betAddress: string;

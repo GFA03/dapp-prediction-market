@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { BetState, StatusLabels } from "../models/types";
+import { BetState, BetStatus, StatusLabels } from "../models/types";
 import { RootState } from "../store";
 import { createSelector } from "reselect";
 
@@ -102,8 +102,8 @@ export const selectOpenBets = createSelector(
   [selectBets, (_: RootState) => _],
   (bets) => {
     return Object.entries(bets)
-      .filter(([, bet]) => bet.status === 0)
-      .map(([address, bet]) => ({ address, ...bet }));
+      .filter(([, bet]) => bet.status === BetStatus.Open)
+      .map(([address, bet]) => ({ betAddress: address, ...bet }));
   }
 )
 
@@ -118,7 +118,7 @@ export const selectUserActiveBets = createSelector(
     if (!userBets[userAddress.toLowerCase()]) return [];
     return userBets[userAddress.toLowerCase()].filter(
       (bet) => 
-        StatusLabels[bets[bet.betAddress.toLowerCase()].status as keyof typeof StatusLabels] === 'Open' || StatusLabels[bets[bet.betAddress.toLowerCase()].status as keyof typeof StatusLabels] === 'Closed'
+        bets[bet.betAddress.toLowerCase()].status === BetStatus.Open || bets[bet.betAddress.toLowerCase()].status === BetStatus.Closed
     ) || [];
   }
 );
@@ -134,7 +134,7 @@ export const selectUserHistoryBets = createSelector(
     if (!userBets[userAddress.toLowerCase()]) return [];
     return userBets[userAddress.toLowerCase()].filter(
       (bet) => 
-        StatusLabels[bets[bet.betAddress.toLowerCase()].status as keyof typeof StatusLabels] === 'Canceled' || StatusLabels[bets[bet.betAddress.toLowerCase()].status as keyof typeof StatusLabels] === 'Finished'
+        bets[bet.betAddress.toLowerCase()].status === BetStatus.Closed || bets[bet.betAddress.toLowerCase()].status === BetStatus.Finished
     ) || [];
   }
 );

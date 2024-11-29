@@ -1,12 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   cashbackBet,
-  fetchUserHistoryBets,
   withdrawBet,
 } from "../utils/contractServices";
 import MyBetCard from "./MyBetCard";
-import { CircularProgress, Grid, Tab, Tabs, Typography } from "@mui/material";
-import { UserBet } from "../models/types";
+import { Grid, Tab, Tabs, Typography } from "@mui/material";
 import FinishedBetCard from "./FinishedBetCard";
 import { useSelector } from "react-redux";
 import { RootState } from "../store";
