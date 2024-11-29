@@ -18,8 +18,8 @@ const FinishedBetCard: React.FC<FinishedBetCardProps> = ({
 }) => {
   const betDetails = useSelector((state: RootState) => selectBetByAddress(state, betAddress));
   if (!betDetails) return null;
-  const { name, options, status } = betDetails; 
-  const won = false;
+  const { name, options, status, winningOption } = betDetails;
+  const won = winningOption === chosenOption;
   return (
     <Card
       className={`shadow-lg rounded-lg transition-transform hover:scale-105 ${

@@ -36,8 +36,8 @@ contract Bet is Ownable, IWithdrawal {
     );
     event BetClosed();
     event BetCanceled();
+    event DeclaredWinner(uint option);
     event CashbackEvent(address indexed bettor, uint amount);
-    event WinnerEvent(address indexed winner, uint amount);
 
     constructor(
         string memory _name,
@@ -107,6 +107,7 @@ contract Bet is Ownable, IWithdrawal {
         require(_winningOption < options.length, "Invalid option");
 
         status = Status.Finished;
+        emit DeclaredWinner(_winningOption);
         distributeRewards(_winningOption);
     }
 
@@ -132,7 +133,6 @@ contract Bet is Ownable, IWithdrawal {
                     totalWinningAmount
                 );
                 balances[bettors[i]] += payout;
-                emit WinnerEvent(bettors[i], payout);
             }
         }
     }

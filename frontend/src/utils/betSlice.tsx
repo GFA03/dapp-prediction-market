@@ -28,6 +28,7 @@ const betSlice = createSlice({
         ownerAddress: ownerAddress.toLowerCase(),
         name,
         options,
+        winningOption: -1,
         status,
         bettors: {},
       };
@@ -81,6 +82,14 @@ const betSlice = createSlice({
       const bet = state.bets[betAddress.toLowerCase()];
       if (bet) {
         bet.status = BetStatus.Canceled;
+      }
+    },
+    setWinner: (state, action: PayloadAction<{ betAddress: string; winningOption: number }>) => {
+      const { betAddress, winningOption } = action.payload;
+      const normalizedBetAddress = betAddress.toLowerCase();
+      const bet = state.bets[normalizedBetAddress];
+      if (bet) {
+        bet.winningOption = winningOption;
       }
     }
   },
@@ -150,5 +159,5 @@ export const selectUserHistoryBets = createSelector(
   }
 );
 
-export const { addBet, addBettor, addUserBet, closeBet, cancelBet } = betSlice.actions;
+export const { addBet, addBettor, addUserBet, closeBet, cancelBet, setWinner } = betSlice.actions;
 export default betSlice.reducer;

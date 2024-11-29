@@ -1,7 +1,14 @@
 import React, { useEffect } from "react";
 import { BrowserProvider, Contract } from "ethers";
 import { useDispatch } from "react-redux";
-import { addBet, addBettor, addUserBet, cancelBet, closeBet } from "../utils/betSlice";
+import {
+  addBet,
+  addBettor,
+  addUserBet,
+  cancelBet,
+  closeBet,
+  setWinner,
+} from "../utils/betSlice";
 import BetFactory from "../artifacts/contracts/Bet_Factory.sol/Bet_Factory.json";
 import Bet from "../artifacts/contracts/Bet.sol/Bet.json";
 import { AppDispatch } from "../store";
@@ -23,6 +30,7 @@ const EventListener: React.FC = () => {
 
     // Fetch past BetCreated events
     const fetchPastBets = async () => {
+      console.log("Fetching past bets");
       const filter = contract.filters.BetCreated();
       const logs = await provider.getLogs({
         ...filter,
@@ -32,12 +40,18 @@ const EventListener: React.FC = () => {
 
       for (const log of logs) {
         const parsedLog = contract.interface.parseLog(log);
-        
+
         if (parsedLog === null) {
           continue;
         }
 
+        if (parsedLog.name !== "BetCreated") {
+          continue;
+        }
+
         const { userAddress, betAddress } = parsedLog.args;
+
+        console.log("Adding bet", betAddress);
 
         // Fetch bet details
         const betContract = new Contract(betAddress, BetABI, provider);
@@ -59,6 +73,9 @@ const EventListener: React.FC = () => {
         // Fetch bettors for this bet
         fetchPastBettors(betAddress);
 
+        // Look for declared winner
+        fetchWinner(betAddress);
+
         // Initialize event listeners for this bet
         listenToBetEvents(betAddress);
       }
@@ -67,26 +84,56 @@ const EventListener: React.FC = () => {
     const fetchPastBettors = async (betAddress: string) => {
       const currentBets = await fetchBettors(betAddress);
 
-        for (const bettor of currentBets) {
-          console.log("Adding bettor", bettor);
-          dispatch(
-            addBettor({
-              betAddress,
-              bettorAddress: bettor.bettorAddress,
-              option: Number(bettor.option),
-              amount: Number(bettor.amount),
-            })
-          );
-          dispatch(
-            addUserBet({
-              userAddress: bettor.bettorAddress,
-              betAddress,
-              option: Number(bettor.option),
-              amount: Number(bettor.amount),
-            })
-          );
+      for (const bettor of currentBets) {
+        console.log("Adding bettor", bettor);
+        dispatch(
+          addBettor({
+            betAddress,
+            bettorAddress: bettor.bettorAddress,
+            option: Number(bettor.option),
+            amount: Number(bettor.amount),
+          })
+        );
+        dispatch(
+          addUserBet({
+            userAddress: bettor.bettorAddress,
+            betAddress,
+            option: Number(bettor.option),
+            amount: Number(bettor.amount),
+          })
+        );
+      }
+    };
+
+    const fetchWinner = async (betAddress: string) => {
+      const betContract = new Contract(betAddress, BetABI, provider);
+      const winnerFilter = betContract.filters.DeclaredWinner();
+        const winnerLogs = await provider.getLogs({
+          ...winnerFilter,
+          fromBlock: 0,
+          toBlock: "latest",
+        });
+
+        for (const winnerLog of winnerLogs) {
+          if (winnerLog.address !== betAddress) {
+            continue;
+          }
+
+          const parsedWinnerLog = betContract.interface.parseLog(winnerLog);
+
+          if (parsedWinnerLog === null) {
+            continue;
+          }
+
+          if (parsedWinnerLog.name !== 'DeclaredWinner') {
+            continue;
+          }
+
+          const winningOption = Number(parsedWinnerLog.args[0]);
+          dispatch(setWinner({ betAddress, winningOption }));
         }
-    }
+    };
+
 
     // Listen for new BetCreated events
     const listenForNewBets = () => {
@@ -138,15 +185,18 @@ const EventListener: React.FC = () => {
       });
 
       betContract.on("BetClosed", () => {
-        dispatch(
-          closeBet(betAddress)
-        )
+        console.log("New BetClosed received");
+        dispatch(closeBet(betAddress));
       });
 
       betContract.on("BetCanceled", () => {
-        dispatch(
-          cancelBet(betAddress)
-        )
+        console.log("New BetCanceled received");
+        dispatch(cancelBet(betAddress));
+      });
+
+      betContract.on("DeclaredWinner", (winningOption) => {
+        console.log("New DeclaredWinner received");
+        dispatch(setWinner({betAddress, winningOption: Number(winningOption)}));
       });
     };
 

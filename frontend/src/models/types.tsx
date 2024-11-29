@@ -28,6 +28,7 @@ export interface Bet {
   ownerAddress: string;
   name: string;
   options: string[];
+  winningOption: number;
   status: number; 
   bettors: Record<string, Bettor>; // Bettor address as key
 }

@@ -144,7 +144,7 @@ export const fetchAllBets = async () => {
       const status = Number(await betContract.getStatus());
       const owner = await betContract.owner();
       // bets.push({ address: betAddress, ownerAddress: owner, name, options, status });
-      bets.bets[betAddress] = { ownerAddress: owner, name, options, status, bettors: {} };
+      bets.bets[betAddress] = { ownerAddress: owner, name, options, winningOption: -1, status, bettors: {} };
     }
     offset += limit;
   }
