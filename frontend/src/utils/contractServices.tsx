@@ -3,14 +3,12 @@ import Bet from "../artifacts/contracts/Bet.sol/Bet.json";
 import {
   BrowserProvider,
   Contract,
-  EventLog,
   formatEther,
   JsonRpcSigner,
   parseEther,
 } from "ethers";
 import { CONTRACT_ADDRESS } from "./constants";
 import { MetaMaskInpageProvider } from "@metamask/providers";
-import { BetState, } from "../models/types";
 
 declare global {
   interface Window {
@@ -124,49 +122,6 @@ export const placeBet = async (
     return false;
   }
 };
-
-export const fetchAllBets = async () => {
-  await ensureInitialized();
-
-  const bets: BetState = {bets: {}, userBets: {}};
-  let offset = 0;
-  const limit = 20;
-
-  while (true) {
-    const count = await getBetsCount();
-    if (count - offset <= 0) break;
-
-    const deployedBets = await getBetsAddresses(limit, offset);
-    for (const betAddress of deployedBets) {
-      const betContract = await initializeBetContract(betAddress);
-      const name = await betContract.getName();
-      const options = await betContract.getOptions();
-      const status = Number(await betContract.getStatus());
-      const owner = await betContract.owner();
-      // bets.push({ address: betAddress, ownerAddress: owner, name, options, status });
-      bets.bets[betAddress] = { ownerAddress: owner, name, options, winningOption: -1, status, bettors: {} };
-    }
-    offset += limit;
-  }
-
-  return bets;
-}
-
-export const fetchBettors = async (betAddress: string) => {
-  const betContract = await initializeBetContract(betAddress);
-  const bettors: {betAddress: string, bettorAddress: string, option: string, amount: string}[] = [];
-  const bets = await betContract.getBets();
-
-  if (bets.length !== 3) {
-    return [];
-  }
-
-  for (let i = 0; i < bets[0].length; i++) {
-    bettors.push({ betAddress, bettorAddress: bets[0][i], option: bets[1][i], amount: bets[2][i] });
-  } 
-  
-  return bettors;
-}
 
 // Bet Management
 const manageBet = async (

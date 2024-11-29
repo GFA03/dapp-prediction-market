@@ -14,7 +14,6 @@ import Bet from "../artifacts/contracts/Bet.sol/Bet.json";
 import { AppDispatch } from "../store";
 import { MetaMaskInpageProvider } from "@metamask/providers";
 import { CONTRACT_ADDRESS } from "../utils/constants";
-import { fetchBettors } from "../utils/contractServices";
 
 const BetFactoryABI = BetFactory.abi;
 const BetABI = Bet.abi;
@@ -82,24 +81,48 @@ const EventListener: React.FC = () => {
     };
 
     const fetchPastBettors = async (betAddress: string) => {
-      const currentBets = await fetchBettors(betAddress);
+      const betContract = new Contract(betAddress, BetABI, provider);
+      const betFilter = betContract.filters.BetPlaced();
+      const betLogs = await provider.getLogs({
+        ...betFilter,
+        fromBlock: 0, // Adjust as needed
+        toBlock: "latest",
+      });
 
-      for (const bettor of currentBets) {
-        console.log("Adding bettor", bettor);
+      for (const betLog of betLogs) {
+        if (betLog.address !== betAddress) {
+          continue;
+        }
+
+        const parsedBetLog = betContract.interface.parseLog(betLog);
+        if (parsedBetLog === null) {
+          continue;
+        }
+
+        if (parsedBetLog.name !== "BetPlaced") {
+          continue;
+        }
+
+        const { bettor, option, amount } = parsedBetLog.args;
+
+        console.log("Found past BetEvent:", bettor, option, amount);
+
+        // Dispatch to add the bettor
         dispatch(
           addBettor({
             betAddress,
-            bettorAddress: bettor.bettorAddress,
-            option: Number(bettor.option),
-            amount: Number(bettor.amount),
+            bettorAddress: bettor,
+            option: Number(option),
+            amount: Number(amount),
           })
         );
+
         dispatch(
           addUserBet({
-            userAddress: bettor.bettorAddress,
+            userAddress: bettor,
             betAddress,
-            option: Number(bettor.option),
-            amount: Number(bettor.amount),
+            option: Number(option),
+            amount: Number(amount),
           })
         );
       }
@@ -108,32 +131,31 @@ const EventListener: React.FC = () => {
     const fetchWinner = async (betAddress: string) => {
       const betContract = new Contract(betAddress, BetABI, provider);
       const winnerFilter = betContract.filters.DeclaredWinner();
-        const winnerLogs = await provider.getLogs({
-          ...winnerFilter,
-          fromBlock: 0,
-          toBlock: "latest",
-        });
+      const winnerLogs = await provider.getLogs({
+        ...winnerFilter,
+        fromBlock: 0,
+        toBlock: "latest",
+      });
 
-        for (const winnerLog of winnerLogs) {
-          if (winnerLog.address !== betAddress) {
-            continue;
-          }
-
-          const parsedWinnerLog = betContract.interface.parseLog(winnerLog);
-
-          if (parsedWinnerLog === null) {
-            continue;
-          }
-
-          if (parsedWinnerLog.name !== 'DeclaredWinner') {
-            continue;
-          }
-
-          const winningOption = Number(parsedWinnerLog.args[0]);
-          dispatch(setWinner({ betAddress, winningOption }));
+      for (const winnerLog of winnerLogs) {
+        if (winnerLog.address !== betAddress) {
+          continue;
         }
-    };
 
+        const parsedWinnerLog = betContract.interface.parseLog(winnerLog);
+
+        if (parsedWinnerLog === null) {
+          continue;
+        }
+
+        if (parsedWinnerLog.name !== "DeclaredWinner") {
+          continue;
+        }
+
+        const winningOption = Number(parsedWinnerLog.args[0]);
+        dispatch(setWinner({ betAddress, winningOption }));
+      }
+    };
 
     // Listen for new BetCreated events
     const listenForNewBets = () => {
@@ -196,7 +218,9 @@ const EventListener: React.FC = () => {
 
       betContract.on("DeclaredWinner", (winningOption) => {
         console.log("New DeclaredWinner received");
-        dispatch(setWinner({betAddress, winningOption: Number(winningOption)}));
+        dispatch(
+          setWinner({ betAddress, winningOption: Number(winningOption) })
+        );
       });
     };
 
