@@ -83,27 +83,6 @@ export const createBet = async (title: string, options: string[]) => {
   }
 };
 
-export const getBetsAddresses = async (limit: number, offset: number) => {
-  await ensureInitialized();
-  try {
-    return await betFactoryContract!.getBets(limit, offset);
-  } catch (error: any) {
-    console.error("Error retrieving bet addresses ⭕", error.message);
-    return [];
-  }
-};
-
-export const getBetsCount = async () => {
-  await ensureInitialized();
-  try {
-    const count = await betFactoryContract!.betsCount();
-    return Number(count);
-  } catch (error: any) {
-    console.error("Error retrieving bet count ⭕", error.message);
-    return 0;
-  }
-};
-
 export const placeBet = async (
   address: string,
   option: number,
