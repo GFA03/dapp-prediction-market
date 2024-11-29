@@ -1,24 +1,30 @@
 import React, { useState } from "react";
-import { Card, CardContent, Typography, Button, Grid, TextField, Box } from "@mui/material";
-import { StatusColors, StatusLabels } from "../models/Bet";
+import {
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  Grid,
+  TextField,
+  Box,
+} from "@mui/material";
+import { Bettor, StatusColors, StatusLabels } from "../models/types";
 
 type BetCardProps = {
-  name: string;
-  options: string[];
-  status: number;
-  address: string;
+  bet: {
+    ownerAddress: string;
+    name: string;
+    options: string[];
+    status: number;
+    bettors: Record<string, Bettor>;
+    betAddress: string;
+  };
   userBalance: string;
   onPlaceBet: (address: string, option: number, amount: string) => void;
 };
 
-const BetCard: React.FC<BetCardProps> = ({
-  name,
-  options,
-  status,
-  address,
-  userBalance,
-  onPlaceBet,
-}) => {
+const BetCard: React.FC<BetCardProps> = ({ bet, userBalance, onPlaceBet }) => {
+  const { betAddress, name, options, status } = bet;
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [betAmount, setBetAmount] = useState<string>("");
 
@@ -32,7 +38,7 @@ const BetCard: React.FC<BetCardProps> = ({
       alert("Please enter a valid amount to bet.");
       return;
     }
-    onPlaceBet(address, selectedOption!, betAmount);
+    onPlaceBet(betAddress, selectedOption!, betAmount);
     setSelectedOption(null); // Hide the input after placing a bet
   };
 
@@ -53,7 +59,9 @@ const BetCard: React.FC<BetCardProps> = ({
 
         <Typography
           variant="body2"
-          className={`font-bold ${StatusColors[status as keyof typeof StatusColors]}`}
+          className={`font-bold ${
+            StatusColors[status as keyof typeof StatusColors]
+          }`}
         >
           Status: {StatusLabels[status as keyof typeof StatusLabels]}
         </Typography>

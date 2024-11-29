@@ -1,37 +1,25 @@
-import React, { useEffect, useState } from "react";
-import { cashbackBet, fetchUserBets, fetchUserHistoryBets, withdrawBet } from "../utils/contractServices";
+import React, { useState } from "react";
+import {
+  cashbackBet,
+  withdrawBet,
+} from "../utils/contractServices";
 import MyBetCard from "./MyBetCard";
-import { CircularProgress, Grid, Tab, Tabs, Typography } from "@mui/material";
-import { UserBet } from "../models/Bet";
+import { Grid, Tab, Tabs, Typography } from "@mui/material";
 import FinishedBetCard from "./FinishedBetCard";
+import { useSelector } from "react-redux";
+import { RootState } from "../store";
+import { selectUserActiveBets, selectUserHistoryBets } from "../utils/betSlice";
 
 const MyBets = ({ account }: { account: string }) => {
-  const [myBets, setMyBets] = useState<UserBet[]>([]);
-  const [myHistoryBets, setMyHistoryBets] = useState<UserBet[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [selectedTab, setSelectedTab] = useState<number>(0);
 
-  useEffect(() => {
-    const loadUserBets = async () => {
-      try {
-        if (selectedTab === 0) {
-          const bets = await fetchUserBets(account);
-          setMyBets(bets);
-        } else if (selectedTab === 1) {
-          const history = await fetchUserHistoryBets(account);
-          setMyHistoryBets(history);
-        }
-      } catch (error) {
-        console.error("Error fetching user bets:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const myBets = useSelector((state: RootState) =>
+    selectUserActiveBets(state, account)
+  );
 
-    if (account) {
-      loadUserBets();
-    }
-  }, [account, selectedTab]);
+  const myHistoryBets = useSelector((state: RootState) =>
+    selectUserHistoryBets(state, account)
+  );
 
   const handleCashback = async (betAddress: string) => {
     console.log(`Cashback triggered for bet contract: ${betAddress}`);
@@ -61,15 +49,11 @@ const MyBets = ({ account }: { account: string }) => {
     setSelectedTab(newValue);
   };
 
-  const renderUserBets = (betsToRender: UserBet[]) => {
-    if (isLoading) {
-      return (
-        <div className="flex justify-center items-center h-64">
-          <CircularProgress />
-        </div>
-      );
-    }
-
+  const renderUserBets = (betsToRender: {
+    betAddress: string;
+    option: number;
+    amount: number;
+}[]) => {
     if (betsToRender.length === 0) {
       return (
         <Typography variant="h6" className="text-center text-gray-500">
@@ -84,14 +68,11 @@ const MyBets = ({ account }: { account: string }) => {
           <Grid item xs key={idx}>
             <MyBetCard
               key={idx}
-              name={bet.name}
-              options={bet.options}
-              status={bet.status}
-              balanceToWithdraw={bet.balanceToWithdraw}
-              chosenOption={bet.options[Number(bet.betData[0])]}
-              amount={Number(bet.betData[1])}
-              onCashback={() => handleCashback(bet.address)}
-              onWithdraw={() => handleWithdraw(bet.address)}
+              betAddress={bet.betAddress}
+              chosenOption={Number(bet.option)}
+              amount={bet.amount}
+              onCashback={() => handleCashback(bet.betAddress)}
+              onWithdraw={() => handleWithdraw(bet.betAddress)}
             />
           </Grid>
         ))}
@@ -99,15 +80,11 @@ const MyBets = ({ account }: { account: string }) => {
     );
   };
 
-  const renderUserHistoryBets = (betsToRender: UserBet[]) => {
-    if (isLoading) {
-      return (
-        <div className="flex justify-center items-center h-64">
-          <CircularProgress />
-        </div>
-      );
-    }
-
+  const renderUserHistoryBets = (betsToRender: {
+    betAddress: string;
+    option: number;
+    amount: number;
+}[]) => {
     if (betsToRender.length === 0) {
       return (
         <Typography variant="h6" className="text-center text-gray-500">
@@ -119,18 +96,12 @@ const MyBets = ({ account }: { account: string }) => {
     return (
       <Grid container spacing={4}>
         {betsToRender.map((bet, idx) => {
-          const chosenOption = bet.options[Number(bet.betData[0])];
-          const amount = Number(bet.betData[1]);
-          //todo: Implement logic to determine if the user won the bet
-          const won = amount > 0;
-  
           return (
             <Grid item xs={12} sm={6} md={4} key={idx}>
               <FinishedBetCard
-                name={bet.name}
-                status={bet.status} // Mapping numeric status to a readable label
-                chosenOption={chosenOption}
-                won={won}
+                betAddress={bet.betAddress}
+                chosenOption={Number(bet.option)}
+                amount={bet.amount}
               />
             </Grid>
           );

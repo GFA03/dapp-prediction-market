@@ -29,15 +29,15 @@ contract Bet is Ownable, IWithdrawal {
     // mapping for Withdrawal Pattern (how much money each bettor is to take)
     mapping(address => uint) public balances;
 
-    event BetEvent(
+    event BetPlaced(
         address indexed bettor,
-        uint indexed option,
-        uint indexed amount
+        uint option,
+        uint amount
     );
-    event CloseEvent();
-    event CancelEvent();
-    event CashbackEvent(address indexed bettor, uint indexed amount);
-    event WinnerEvent(address indexed winner, uint indexed amount);
+    event BetClosed();
+    event BetCanceled();
+    event DeclaredWinner(uint option);
+    event CashbackEvent(address indexed bettor, uint amount);
 
     constructor(
         string memory _name,
@@ -81,11 +81,25 @@ contract Bet is Ownable, IWithdrawal {
         return balances[msg.sender];
     }
 
+    function getBets() public view returns (address[] memory, uint[] memory, uint[] memory) {
+        address[] memory bettorsArray = new address[](bettors.length);
+        uint[] memory optionsArray = new uint[](bettors.length);
+        uint[] memory amountsArray = new uint[](bettors.length);
+
+        for (uint i = 0; i < bettors.length; i++) {
+            bettorsArray[i] = bettors[i];
+            optionsArray[i] = bets[bettors[i]].option;
+            amountsArray[i] = bets[bettors[i]].amount;
+        }
+
+        return (bettorsArray, optionsArray, amountsArray);
+    }
+
     function bet(uint _option) external payable canPlaceBet(_option) {
         bets[msg.sender] = BetRecord(_option, msg.value);
         bettors.push(msg.sender);
 
-        emit BetEvent(msg.sender, _option, msg.value);
+        emit BetPlaced(msg.sender, _option, msg.value);
     }
 
     function setWinner(uint _winningOption) public onlyOwner {
@@ -93,6 +107,7 @@ contract Bet is Ownable, IWithdrawal {
         require(_winningOption < options.length, "Invalid option");
 
         status = Status.Finished;
+        emit DeclaredWinner(_winningOption);
         distributeRewards(_winningOption);
     }
 
@@ -118,7 +133,6 @@ contract Bet is Ownable, IWithdrawal {
                     totalWinningAmount
                 );
                 balances[bettors[i]] += payout;
-                emit WinnerEvent(bettors[i], payout);
             }
         }
     }
@@ -142,7 +156,7 @@ contract Bet is Ownable, IWithdrawal {
     function close() public onlyOwner {
         require(status == Status.Open, "Betting is closed");
         status = Status.Closed;
-        emit CloseEvent();
+        emit BetClosed();
     }
 
     function cancel() public onlyOwner {
@@ -151,7 +165,7 @@ contract Bet is Ownable, IWithdrawal {
         status = Status.Canceled;
         restoreFunds();
 
-        emit CancelEvent();
+        emit BetCanceled();
     }
 
     // function to return the bet amount to the bettor if the bet was canceled
