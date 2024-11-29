@@ -10,35 +10,18 @@ import { UserBet } from "../models/types";
 import FinishedBetCard from "./FinishedBetCard";
 import { useSelector } from "react-redux";
 import { RootState } from "../store";
-import { selectUserActiveBets } from "../utils/betSlice";
+import { selectUserActiveBets, selectUserHistoryBets } from "../utils/betSlice";
 
 const MyBets = ({ account }: { account: string }) => {
-  const [myHistoryBets, setMyHistoryBets] = useState<UserBet[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [selectedTab, setSelectedTab] = useState<number>(0);
 
   const myBets = useSelector((state: RootState) =>
     selectUserActiveBets(state, account)
   );
 
-  useEffect(() => {
-    const loadUserBets = async () => {
-      try {
-        if (selectedTab === 1) {
-          const history = await fetchUserHistoryBets(account);
-          setMyHistoryBets(history);
-        }
-      } catch (error) {
-        console.error("Error fetching user bets:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (account) {
-      loadUserBets();
-    }
-  }, [account, selectedTab]);
+  const myHistoryBets = useSelector((state: RootState) =>
+    selectUserHistoryBets(state, account)
+  );
 
   const handleCashback = async (betAddress: string) => {
     console.log(`Cashback triggered for bet contract: ${betAddress}`);
@@ -73,14 +56,6 @@ const MyBets = ({ account }: { account: string }) => {
     option: number;
     amount: number;
 }[]) => {
-    if (isLoading) {
-      return (
-        <div className="flex justify-center items-center h-64">
-          <CircularProgress />
-        </div>
-      );
-    }
-
     if (betsToRender.length === 0) {
       return (
         <Typography variant="h6" className="text-center text-gray-500">
@@ -107,15 +82,11 @@ const MyBets = ({ account }: { account: string }) => {
     );
   };
 
-  const renderUserHistoryBets = (betsToRender: UserBet[]) => {
-    if (isLoading) {
-      return (
-        <div className="flex justify-center items-center h-64">
-          <CircularProgress />
-        </div>
-      );
-    }
-
+  const renderUserHistoryBets = (betsToRender: {
+    betAddress: string;
+    option: number;
+    amount: number;
+}[]) => {
     if (betsToRender.length === 0) {
       return (
         <Typography variant="h6" className="text-center text-gray-500">
@@ -127,18 +98,12 @@ const MyBets = ({ account }: { account: string }) => {
     return (
       <Grid container spacing={4}>
         {betsToRender.map((bet, idx) => {
-          const chosenOption = bet.options[Number(bet.betData[0])];
-          const amount = Number(bet.betData[1]);
-          //todo: Implement logic to determine if the user won the bet
-          const won = amount > 0;
-
           return (
             <Grid item xs={12} sm={6} md={4} key={idx}>
               <FinishedBetCard
-                name={bet.name}
-                status={bet.status} // Mapping numeric status to a readable label
-                chosenOption={chosenOption}
-                won={won}
+                betAddress={bet.betAddress}
+                chosenOption={Number(bet.option)}
+                amount={bet.amount}
               />
             </Grid>
           );

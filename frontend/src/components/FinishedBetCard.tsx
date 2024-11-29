@@ -1,20 +1,25 @@
 import React from "react";
 import { Card, CardContent, Typography } from "@mui/material";
 import { StatusLabels } from "../models/types";
+import { useSelector } from "react-redux";
+import { selectBetByAddress } from "../utils/betSlice";
+import { RootState } from "../store";
 
 type FinishedBetCardProps = {
-  name: string;
-  status: number;
-  chosenOption: string;
-  won: boolean;
+  betAddress: string;
+  chosenOption: number;
+  amount: number;
 };
 
 const FinishedBetCard: React.FC<FinishedBetCardProps> = ({
-  name,
-  status,
+  betAddress,
   chosenOption,
-  won,
+  amount,
 }) => {
+  const betDetails = useSelector((state: RootState) => selectBetByAddress(state, betAddress));
+  if (!betDetails) return null;
+  const { name, options, status } = betDetails; 
+  const won = false;
   return (
     <Card
       className={`shadow-lg rounded-lg transition-transform hover:scale-105 ${
@@ -37,7 +42,7 @@ const FinishedBetCard: React.FC<FinishedBetCardProps> = ({
           Status: {StatusLabels[status as keyof typeof StatusLabels]}
         </Typography>
         <Typography variant="body1" className="text-center text-gray-700 mt-4">
-          Your Option: <span className="font-medium">{chosenOption}</span>
+          Your Option: <span className="font-medium">{options[chosenOption]}</span>
         </Typography>
         <Typography
           variant="body1"
