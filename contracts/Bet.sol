@@ -29,7 +29,7 @@ contract Bet is Ownable, IWithdrawal {
     // mapping for Withdrawal Pattern (how much money each bettor is to take)
     mapping(address => uint) public balances;
 
-    event BetEvent(
+    event BetPlaced(
         address indexed bettor,
         uint option,
         uint amount
@@ -99,7 +99,7 @@ contract Bet is Ownable, IWithdrawal {
         bets[msg.sender] = BetRecord(_option, msg.value);
         bettors.push(msg.sender);
 
-        emit BetEvent(msg.sender, _option, msg.value);
+        emit BetPlaced(msg.sender, _option, msg.value);
     }
 
     function setWinner(uint _winningOption) public onlyOwner {
