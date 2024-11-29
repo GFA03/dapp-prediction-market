@@ -57,7 +57,15 @@ const EventListener: React.FC = () => {
         );
 
         // Fetch bettors for this bet
-        const currentBets = await fetchBettors(betAddress);
+        fetchPastBettors(betAddress);
+
+        // Initialize event listeners for this bet
+        listenToBetEvents(betAddress);
+      }
+    };
+
+    const fetchPastBettors = async (betAddress: string) => {
+      const currentBets = await fetchBettors(betAddress);
 
         for (const bettor of currentBets) {
           console.log("Adding bettor", bettor);
@@ -78,11 +86,7 @@ const EventListener: React.FC = () => {
             })
           );
         }
-
-        // Initialize event listeners for this bet
-        listenToBetEvents(betAddress);
-      }
-    };
+    }
 
     // Listen for new BetCreated events
     const listenForNewBets = () => {
@@ -113,22 +117,22 @@ const EventListener: React.FC = () => {
     // Listen for BetEvent
     const listenToBetEvents = (betAddress: string) => {
       const betContract = new Contract(betAddress, BetABI, provider);
-      betContract.on("BetEvent", (bettor, option, amount) => {
-        console.log("BetEvent received");
+      betContract.on("BetPlaced", (bettor, option, amount) => {
+        console.log("BetPlaced received");
         dispatch(
           addBettor({
             betAddress,
             bettorAddress: bettor,
-            option: option.toNumber(),
-            amount: amount.toNumber(),
+            option: Number(option),
+            amount: Number(amount),
           })
         );
         dispatch(
           addUserBet({
             userAddress: bettor,
             betAddress,
-            option: option.toNumber(),
-            amount: amount.toNumber(),
+            option: Number(option),
+            amount: Number(amount),
           })
         );
       });

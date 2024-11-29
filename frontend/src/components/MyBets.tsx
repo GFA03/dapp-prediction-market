@@ -18,7 +18,7 @@ const MyBets = ({ account }: { account: string }) => {
   const [selectedTab, setSelectedTab] = useState<number>(0);
 
   const myBets = useSelector((state: RootState) =>
-    selectUserActiveBets(state, account.toLowerCase())
+    selectUserActiveBets(state, account)
   );
 
   useEffect(() => {

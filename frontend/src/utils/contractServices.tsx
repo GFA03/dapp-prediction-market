@@ -177,7 +177,7 @@ const fetchBets = async (
     for (const betAddress of deployedBets) {
       const betContract = await initializeBetContract(betAddress);
       if (await filterFn(betContract)) {
-        const filter = betContract.filters.BetEvent(userAddress);
+        const filter = betContract.filters.BetPlaced(userAddress);
 
         const logs = await betContract.queryFilter(filter);
         console.log(`Logs for ${betAddress}: ${logs.length}`);
@@ -225,7 +225,7 @@ export const fetchAllOpenBets = async () => {
     const deployedBets = await getBetsAddresses(limit, offset);
     for (const betAddress of deployedBets) {
       const betContract = await initializeBetContract(betAddress);
-      // betContract.on("BetEvent", (user, option, amount) => {
+      // betContract.on("BetPlaced", (user, option, amount) => {
       //   console.log(`Contract ${betAddress}: \n`);
       //   console.log(`BetEvent: ${user}, ${option}, ${amount}`);
       // });
