@@ -89,10 +89,11 @@ const CreatedBetCard = ({
           ) : null}
           {StatusLabels[status as keyof typeof StatusLabels] === "Closed" ? (
             <div style={{ marginTop: "1rem" }}>
+              <Typography variant="body1" color="text.secondary">Choose Winner:</Typography>
               <Grid
                 container
                 spacing={2}
-                style={{ marginTop: "1rem", paddingBottom: "1rem" }}
+                style={{ paddingBottom: "1rem" }}
               >
                 {options.map((option, index) => (
                   <Grid item xs={6} key={index}>

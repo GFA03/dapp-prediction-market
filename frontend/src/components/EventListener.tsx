@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { BrowserProvider, Contract } from "ethers";
 import { useDispatch } from "react-redux";
-import { addBet, addBettor, addUserBet } from "../utils/betSlice";
+import { addBet, addBettor, addUserBet, cancelBet, closeBet } from "../utils/betSlice";
 import BetFactory from "../artifacts/contracts/Bet_Factory.sol/Bet_Factory.json";
 import Bet from "../artifacts/contracts/Bet.sol/Bet.json";
 import { AppDispatch } from "../store";
@@ -135,6 +135,18 @@ const EventListener: React.FC = () => {
             amount: Number(amount),
           })
         );
+      });
+
+      betContract.on("BetClosed", () => {
+        dispatch(
+          closeBet(betAddress)
+        )
+      });
+
+      betContract.on("BetCanceled", () => {
+        dispatch(
+          cancelBet(betAddress)
+        )
       });
     };
 

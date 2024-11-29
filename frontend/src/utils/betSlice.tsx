@@ -69,6 +69,20 @@ const betSlice = createSlice({
     
       state.userBets[normalizedUserAddress].push({ betAddress: betAddress.toLowerCase(), option, amount });
     },
+    closeBet: (state, action: PayloadAction<string>) => {
+      const betAddress = action.payload;
+      const bet = state.bets[betAddress.toLowerCase()];
+      if (bet) {
+        bet.status = BetStatus.Closed;
+      }
+    },
+    cancelBet: (state, action: PayloadAction<string>) => {
+      const betAddress = action.payload;
+      const bet = state.bets[betAddress.toLowerCase()];
+      if (bet) {
+        bet.status = BetStatus.Canceled;
+      }
+    },
     setBets: (state, action: PayloadAction<BetState>) => {
       state.bets = action.payload.bets;
     },
@@ -134,10 +148,10 @@ export const selectUserHistoryBets = createSelector(
     if (!userBets[userAddress.toLowerCase()]) return [];
     return userBets[userAddress.toLowerCase()].filter(
       (bet) => 
-        bets[bet.betAddress.toLowerCase()].status === BetStatus.Closed || bets[bet.betAddress.toLowerCase()].status === BetStatus.Finished
+        bets[bet.betAddress.toLowerCase()].status === BetStatus.Canceled || bets[bet.betAddress.toLowerCase()].status === BetStatus.Finished
     ) || [];
   }
 );
 
-export const { addBet, addBettor, addUserBet, setBets } = betSlice.actions;
+export const { addBet, addBettor, addUserBet, closeBet, cancelBet, setBets } = betSlice.actions;
 export default betSlice.reducer;
