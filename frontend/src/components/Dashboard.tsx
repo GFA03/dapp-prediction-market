@@ -7,7 +7,7 @@ const Dashboard = ({ account, balance, updateBalance }: { account: string; balan
   return (
     <Box p={3}>
       <BetFactoryInfo account={account} balance={balance} />
-      <BetActions account={account} balance={balance} updateBalance={updateBalance} />
+      <BetActions updateBalance={updateBalance} />
     </Box>
   );
 };

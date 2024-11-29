@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { createBet, getBetsCount } from "../utils/contractServices";
+import React, { useState } from "react";
+import { createBet} from "../utils/contractServices";
 import {
   Box,
   Button,
@@ -14,29 +14,21 @@ import {
   Typography,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { RootState } from "../store";
+import { useSelector } from "react-redux";
 
 const BetActions = ({
-  account,
-  balance,
   updateBalance,
 }: {
-  account: string;
-  balance: string;
   updateBalance: () => void;
 }) => {
   const [title, setTitle] = useState("");
   const [options, setOptions] = useState<string[]>([]);
   const [optionInput, setOptionInput] = useState("");
-  const [betCount, setBetCount] = useState<number>(0);
 
-  useEffect(() => {
-    fetchBetsCount();
-  }, []);
-
-  const fetchBetsCount = async () => {
-    const count = await getBetsCount();
-    setBetCount(count);
-  };
+  const betCount = useSelector((state: RootState) => 
+    Object.keys(state.bets.bets).length
+  );
 
   const handleCreateBet = async () => {
     if (!title || options.length < 2 || options.length > 8) {
@@ -50,7 +42,6 @@ const BetActions = ({
     setTitle("");
     setOptions([]);
     setOptionInput("");
-    fetchBetsCount(); // Refresh bet count
     updateBalance();
   };
 
