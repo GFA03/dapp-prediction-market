@@ -86,4 +86,6 @@ https://github.com/GFA03/dapp-prediction-market/blob/965c921492b403bb461a754dcb0
 
 https://github.com/GFA03/dapp-prediction-market/blob/965c921492b403bb461a754dcb0842fbb15ebe34/frontend/src/utils/contractServices.tsx#L86-L170
 
+### Project walkthrough
+
 Pentru un walkthrough al proiectului accesati [aici](./docs/project-walkthrough.md)
