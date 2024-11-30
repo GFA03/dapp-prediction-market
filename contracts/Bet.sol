@@ -185,7 +185,7 @@ contract Bet is Ownable, WithdrawalBase {
         uint amount = bets[msg.sender].amount;
         delete bets[msg.sender];
 
-        payable(msg.sender).transfer(amount);
+        _updateBalance(msg.sender, amount);
 
         emit CashbackEvent(msg.sender, amount);
     }
