@@ -127,7 +127,6 @@ contract Bet is Ownable, WithdrawalBase {
             }
         }
 
-        require(totalWinningAmount > 0, "No winning bets");
         uint totalAmount = address(this).balance;
 
         // Distribute rewards to winners
