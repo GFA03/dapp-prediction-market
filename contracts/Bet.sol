@@ -173,10 +173,9 @@ contract Bet is Ownable, WithdrawalBase {
         for (uint i = 0; i < bettors.length; i++) {
             address bettor = bettors[i];
             uint amount = bets[bettor].amount;
-            if (amount > 0) {
-                _updateBalance(bettor, amount);
-                emit CashbackEvent(bettor, amount);
-            }
+            
+            _updateBalance(bettor, amount);
+            emit PayoutEvent(bettor, amount);
         }
     }
 

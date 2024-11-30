@@ -19,11 +19,7 @@ abstract contract WithdrawalBase {
         balances[account] += amount;
     }
 
-    function _resetBalance(address account) internal {
-        balances[account] = 0;
-    }
-
-    function getBalance(address account) public view returns (uint) {
+    function getUserBalance(address account) public view returns (uint) {
         return balances[account];
     }
 }

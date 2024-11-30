@@ -6,7 +6,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 
 describe("Bet", () => {
   const OPTION_INDEX = 0;
-  const AMOUNT = 1000;
+  const AMOUNT = 100000000000000;
   const INVALID_OPTION_INDEX = 2;
   const REVERT_BET_CLOSED = "Betting is closed";
   const REVERT_ALREADY_BET = "You already bet";
@@ -59,6 +59,10 @@ describe("Bet", () => {
     ) {
       return bet.connect(account).bet(option, { value: amount });
     }
+
+    it("Should have default status as Open", async () => {
+      expect(await bet.getStatus()).to.equal(0); // Status.Open is 0
+    });
 
     it("Should allow a single bet and update the balance", async () => {
       await placeBet(otherAccount);
@@ -114,6 +118,21 @@ describe("Bet", () => {
     it("Should revert bet if value is 0", async () => {
       await expect(bet.connect(otherAccount).bet(OPTION_INDEX, { value: 0 })).to.be.revertedWith("Value must be greater than 0");
     });
+
+    it("Should get all bets", async () => {
+      await placeBet(otherAccount);
+      await placeBet(owner, 1);
+      const bets = await bet.getBets();
+      const addresses = bets[0];
+      const options = bets[1];
+      const amounts = bets[2];
+      expect(addresses[0]).to.equal(otherAccount.address);
+      expect(addresses[1]).to.equal(owner.address);
+      expect(options[0]).to.equal(OPTION_INDEX);
+      expect(options[1]).to.equal(1);
+      expect(amounts[0]).to.equal(BigInt(AMOUNT));
+      expect(amounts[1]).to.equal(BigInt(AMOUNT));
+    });
   });
 
   describe("Cashback", () => {
@@ -130,26 +149,6 @@ describe("Bet", () => {
     ) {
       return bet.connect(account).bet(option, { value: amount });
     }
-
-    // it("Should allow a bettor to withdraw their bet", async () => {
-    //   const provider = hre.ethers.provider;
-    //   await placeBet(otherAccount);
-    //   const postBetBalance = await provider.getBalance(otherAccount.address);
-
-    //   const tx = await bet.connect(otherAccount).cashbackBet();
-    //   const receipt = await tx.wait();
-    //   const postWithdrawBalance = await provider.getBalance(
-    //     otherAccount.address
-    //   );
-    //   if (receipt !== null) {
-    //     const gasUsed = receipt.gasUsed;
-    //     const gasPrice = receipt.gasPrice;
-
-    //     const expectedBalanceAfterWithdraw =
-    //       postBetBalance + BigInt(AMOUNT) - gasUsed * gasPrice;
-    //     expect(postWithdrawBalance).to.equal(expectedBalanceAfterWithdraw);
-    //   }
-    // });
 
     it("Should allow a bettor to cashback their bet", async () => {
       await placeBet(otherAccount);
@@ -240,7 +239,7 @@ describe("Bet", () => {
     });
 
     it("Should emit Closing Event", async () => {
-      await expect(bet.connect(owner).close()).to.emit(bet, "CloseEvent");
+      await expect(bet.connect(owner).close()).to.emit(bet, "BetClosed");
     });
   });
 
@@ -294,18 +293,14 @@ describe("Bet", () => {
 
     it("Should refund the bettors after the event is canceled", async () => {
       await placeBet(otherAccount);
-      const preBalance = await hre.ethers.provider.getBalance(
-        otherAccount.address
-      );
       await bet.connect(owner).cancel();
-      const postBalance = await hre.ethers.provider.getBalance(
-        otherAccount.address
-      );
-      expect(postBalance).to.equal(preBalance + BigInt(AMOUNT));
+      const balanceToWithdraw = await bet.getUserBalance(otherAccount);
+      
+      expect(balanceToWithdraw).to.equal(BigInt(AMOUNT));
     });
 
     it("Should emit Canceling Event", async () => {
-      await expect(bet.connect(owner).cancel()).to.emit(bet, "CancelEvent");
+      await expect(bet.connect(owner).cancel()).to.emit(bet, "BetCanceled");
     });
   });
 
@@ -329,6 +324,12 @@ describe("Bet", () => {
       await bet.connect(owner).close();
       await bet.connect(owner).setWinner(OPTION_INDEX);
       expect(await bet.status()).to.equal(3); // Status.Finished is 3
+    });
+
+    it("Should emit WinnerDeclared event", async () => {
+      await placeBet(owner);
+      await bet.connect(owner).close();
+      await expect(bet.connect(owner).setWinner(OPTION_INDEX)).to.emit(bet, "DeclaredWinner");
     });
 
     it("Should not allow the owner to declare a winner if there are no winning bets", async () => {
@@ -400,6 +401,22 @@ describe("Bet", () => {
         [otherAccount, bet],
         [BigInt(AMOUNT * 2), BigInt(-AMOUNT * 2)]
       )
+    });
+
+    it("Should get all payouts", async () => {
+      await placeBet(user1); // user1 bets on option 0 with AMOUNT
+      await placeBet(user2, 1, AMOUNT * 2); // user2 bets on option 1 with 2 * AMOUNT
+      await placeBet(otherAccount); // otherAccount bets on option 0 with AMOUNT
+
+      // Close and declare winner
+      await bet.connect(owner).close();
+      await bet.connect(owner).setWinner(OPTION_INDEX);
+
+      const payouts = await bet.getPayouts();
+      const amountsPayouts = payouts[1];
+      await expect(amountsPayouts[0]).to.equal(BigInt(AMOUNT * 2));
+      await expect(amountsPayouts[1]).to.equal(BigInt(0));
+      await expect(amountsPayouts[2]).to.equal(BigInt(AMOUNT * 2));
     });
 
     it("Should not allow a loser bettor to withdraw money", async () => {
