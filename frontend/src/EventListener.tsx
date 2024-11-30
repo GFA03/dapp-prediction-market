@@ -257,7 +257,7 @@ const EventListener: React.FC = () => {
         );
       });
 
-      betContract.on("WithdrawalEvent", (bettor, amount) => {
+      betContract.on("WithdrawalEvent", (bettor) => {
         console.log("New Withdrawal received");
         dispatch(
           resetUserPayout({
