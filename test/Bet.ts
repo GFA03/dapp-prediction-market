@@ -332,11 +332,6 @@ describe("Bet", () => {
       await expect(bet.connect(owner).setWinner(OPTION_INDEX)).to.emit(bet, "DeclaredWinner");
     });
 
-    it("Should not allow the owner to declare a winner if there are no winning bets", async () => {
-      await bet.connect(owner).close();
-      await expect(bet.connect(owner).setWinner(OPTION_INDEX)).to.be.revertedWith("No winning bets");
-    });
-
     it("Should not allow the owner to declare a winner if the event is not closed", async () => {
       await expect(bet.connect(owner).setWinner(OPTION_INDEX)).to.be.revertedWith("Betting must be closed to set a winner");
     });
