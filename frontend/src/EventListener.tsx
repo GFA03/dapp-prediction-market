@@ -257,6 +257,17 @@ const EventListener: React.FC = () => {
         );
       });
 
+      betContract.on("CashbackEvent", (bettor, amount) => {
+        console.log("New Cashback received");
+        dispatch(
+          addPayoutToUser({
+            userAddress: bettor,
+            betAddress,
+            amount: Number(amount),
+          })
+        );
+      });
+
       betContract.on("WithdrawalEvent", (bettor) => {
         console.log("New Withdrawal received");
         dispatch(
